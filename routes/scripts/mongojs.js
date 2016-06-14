@@ -22,7 +22,7 @@ function connectionState(){
 	return mongoose.connection.readyState;
 }
 
-exports.connectionValid(){
+exports.connectionValid = function(){
 	var status = connectionState();
 	if(status === 0 || status === 2 || status === 3){
 		console.log('Not connected to Mongo.');
