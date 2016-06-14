@@ -78,7 +78,9 @@ body{
     display: block;
     margin: 30px 10px 10px;
 }
-
+.bottom-spacing{
+    margin-top: 7px;
+}
 .logo-img
 {
     width: 96px;
@@ -92,3 +94,4 @@ body{
 #tabs{
     text-align: center;
 }
+
