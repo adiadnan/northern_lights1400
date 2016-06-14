@@ -4,8 +4,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">		
 	<% include partials/default.ejs %>
+	<% include partials/register_scripts.ejs %>
 	<link rel="stylesheet" href="/stylesheets/login.css">
-	<script src="/javascripts/authentication.js"></script>		
 </head>
 <body>
 	<!-- <% include partials/fbjsapp.ejs %> -->
@@ -26,16 +26,18 @@
 								<input type="email" class="form-control bottom-spacing" placeholder="Email Address..." required>
 								<input type="password" class="form-control bottom-spacing" placeholder="Password..." required>
 								<input type="password" class="form-control bottom-spacing" placeholder="Confirm password..." required>
-								<input type="submit" class="btn btn-lg btn-default btn-block bottom-spacing" value="Sign Up" onclick="register()" />
+								<input type="submit" class="btn btn-lg btn-default btn-block bottom-spacing" value="Sign Up"/>
 							</form>
 							<div id="tabs" data-tabs="tabs">
-									<a href="/login">
-										Have an Account?
-									</a>
+								<a href="/login">
+									Have an Account?
+								</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		</html>
+	</div>
+</body>
+</html>

@@ -4,8 +4,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">		
 	<% include partials/default.ejs %>
-	<link rel="stylesheet" href="/stylesheets/login.css">
-	<script src="/javascripts/authentication.js"></script>		
+	<% include partials/login_scripts.ejs %>
+	<link rel="stylesheet" href="/stylesheets/login.css">		
 </head>
 <body>
 	<!-- <% include partials/fbjsapp.ejs %> -->
@@ -23,18 +23,19 @@
 							<form class="form-signin" action="" method="">
 								<input type="text" id="username" class="form-control bottom-spacing" placeholder="Username" required autofocus>
 								<input type="password" id="password" class="form-control bottom-spacing" placeholder="Password" required>
-								<input type="submit" class="btn btn-lg btn-default btn-block bottom-spacing" value="Sign In" onclick="login()"/>
+								<input type="submit" class="btn btn-lg btn-default btn-block bottom-spacing" value="Sign In"/>
 								<!-- <% include partials/fb_login_button.ejs %> -->
-						</form>
-						<div id="tabs" data-tabs="tabs">
+							</form>
+							<div id="tabs" data-tabs="tabs">
 								<a href="/register">
 									Need an Account?
 								</a>
+							</div>
 						</div>
 					</div>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 </body>
 </html>
