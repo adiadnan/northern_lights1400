@@ -15,6 +15,7 @@
     "serve-favicon": "~2.3.0",
     "mongoose" : "latest",
     "intraday" : "latest",
-    "nasdaq-companies" : "latest"
+    "nasdaq-companies" : "latest",
+    "google-finance" : "latest"
   }
 }

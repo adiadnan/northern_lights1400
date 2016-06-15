@@ -21,7 +21,7 @@ function build_object(req){
 
 function build_response_object(m, r){
 	var response_object = {
-		message : message,
+		message : m,
 		reason : r
 	}
 	return response_object;

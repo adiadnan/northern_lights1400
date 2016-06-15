@@ -30,19 +30,3 @@ exports.connectionValid = function(){
 	}
 	return true;
 }
-
-// exports.drop = function(req, res, callback){
-// 	var collectionName = req.params.collectionName;
-// 	var code = req.query.code;
-// 	if(code !== admin_code){
-// 		return callback(null, res, {message : 'Permission denied.'});
-// 	}
-// 	if(collectionName === 'articles') {
-// 		return article.dropArticles(res, callback);
-// 	} else if(collectionName === 'feeds'){
-// 		return google_feed.dropFeeds(res, callback);
-// 	} else if(collectionName === 'single_feeds'){
-// 		return single_google_feed.dropSingularFeeds(res, callback);
-// 	}
-
-// }
