@@ -190,15 +190,26 @@ function getCompanyRating(news, index){
 									return;
 								}
 								console.log('Company is in the database.');
-								if(com.company_sentiment !== 0){
-									com.company_sentiment = (com.company_sentiment + result_object.sentiment)/2;
-								} else {
-									com.company_sentiment = result_object.sentiment;
-								}
-								com.mentioned_by = com.mentioned_by.push(news.link);
-								com.related_to = com.related_to.push(inter_companyRelations(main_company_symbol, result_object.concepts, news.link));
-								com.save();
-							});
+								// var avg;
+								// if(com.company_sentiment !== 0){
+								// 	avg = (com.company_sentiment + result_object.sentiment)/2;
+								// } else {
+								// 	avg = result_object.sentiment;
+								// }
+								// com.mentioned_by.push(news.link);
+								// com.related_to.push(inter_companyRelations(main_company_symbol, result_object.concepts, news.link));
+								// // com.save();
+								// company.update({issuer : issuer_name},{
+								// 	company_sentiment : avg,
+								// 	mentioned_by : com.mentioned_by,
+								// 	related_to : com.related_to
+								// }, null, function(err, num){
+								// 	if(err){
+								// 		return console.log('Problem updating.');
+								// 	}
+								// 	console.log(num + ' rows updated.');
+								// });
+});
 });
 });
 });
@@ -251,6 +262,14 @@ function inter_companyRelations(main_company_symbol, concept_list, link){
 						} else {
 							_t.details = buildCompanyDetailsObject(oop);
 						}
+						company.update({issuer : issuer},{
+							$push : {related_to : _t.details[0].symbol}},{upsert:true},function(err){
+								if(err){
+									console.log(err);
+								}else{
+									console.log("Successfully added");
+								}
+							});
 						// console.log('The list should be here.AAAAAAAAAAAAAAAAA\n' + c);
 						console.log('The list should be here.AAAAAAAAAAAAAAAAA\n' + _t.details);
 						option = {format: 'aarray',	toNumber: true};
@@ -276,6 +295,7 @@ function inter_companyRelations(main_company_symbol, concept_list, link){
 					var y = updateCompanyLinkList(com.issuer,com.mentioned_by,link);
 					if(y !== -1){
 						com.mentioned_by = y;
+						com.related_to.push(main_company_symbol);
 						com.save();
 					}
 				});
