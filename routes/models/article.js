@@ -20,7 +20,7 @@ var articleSchema = new Schema({
 		sentiment : {
 			score : String,
 			type : String
-		}
+		},
 		text : String
 	}],
 	concepts : [{
