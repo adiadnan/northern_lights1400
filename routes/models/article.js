@@ -18,15 +18,32 @@ var articleSchema = new Schema({
 	keywords : [{
 		relevance : {type : String},
 		sentiment : {
-			score : String,
-			type : String
+			score : {type : String},
+			type : {type : String},
+			mixed : {type : String}
 		},
 		text : String
+	}],
+	entities : [{
+		type : {type : String},
+		relevance : {type : String},
+		count : {type : String},
+		text : {type : String},
+		quotations : [{
+			quotation : {type : String}
+		}],
+		sentiment : {
+			type : { type : String},
+			score : {type : String},
+			mixed : {type : String}
+		}
 	}],
 	concepts : [{
 		text : String,
 		relevance : String
 	}]
+},{
+	collection : 'articles_collection'
 });
 /* Creating the model based on the Schema */
 var article = mongoose.model('article', articleSchema);

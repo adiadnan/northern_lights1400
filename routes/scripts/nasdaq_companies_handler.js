@@ -1,3 +1,6 @@
+/* Exporting the methods defined here. */
+var exports = module.exports = {};
+
 var nasdaq_companies = require('nasdaq-companies');
 
 exports.isListed = function(companyName){
@@ -43,6 +46,76 @@ exports.findIssuerFromName = function(companyName){
 	return result;
 }
 
+function replace_redundancies(string){
+	string = string.replace('Inc.','');
+	string = string.replace('inc.','');
+	string = string.replace('Ltd.','');
+	string = string.replace('Corp.','');
+	string = string.replace('LLC','');
+	string = string.replace('Incorporated.','');
+	string = string.trim();
+	string = string.replace(/,\s*$/, '');
+	return string;
+}
+
+exports.company_name_complete_match = function(name){
+	console.log('Starting complete_match search.');
+	var result = [];
+	for(var index = 0; index < nasdaq_companies.length; index++){
+		var string = nasdaq_companies[index].issuer;
+		if(name === string){
+			result.push(nasdaq_companies[index]);
+		}
+	}
+	console.log('Search returned ' + result.length + ' matches.');
+	return result;
+}
+
+exports.company_name_partial_match = function(name){
+	console.log('Starting partial_match search.');
+	var result = [];
+	var max_ratio = 0;
+	var s = '';
+	for(var index = 0; index < nasdaq_companies.length; index++){
+		var string = nasdaq_companies[index]['issuer'];
+		string = replace_redundancies(string);
+		if(string.indexOf(name) > -1){
+			var t = name.length/string.length;
+			if(t >= max_ratio){
+				if(t === max_ratio){
+					result.push(nasdaq_companies[index]);
+				} else if(t > max_ratio){
+					max_ratio = t;
+					s = nasdaq_companies[index];
+					result = [];
+					result.push(nasdaq_companies[index]);
+				}
+			}
+		}
+	}
+	var good = false;
+	if(result.length !== 0){
+		var ratio = name.length/replace_redundancies(result[0].issuer).length;
+		console.log(ratio);
+		if(ratio >= 0.5){
+			good = true;
+		}
+	}
+	if(good == true){
+		console.log('Search returned ' + result.length + ' matches.');
+		console.log('Search accuracy ' + ratio);
+		console.log('Search string length : ' + name.length);
+		console.log('Comparison string length : ' + result[0].issuer.length);
+		return result;
+	} else {
+		console.log('No high accuracy matches worth noticing.');
+		// console.log('Search string length : ' + name.length);
+		// console.log('Comparison string length : ' + replace_redundancies(result[0].issuer).length);
+	}
+
+	return -1;
+}
+
 /* NOT FUNCTIONAL */
 function isListedBS(companyName){
 	var return_object = [];
@@ -64,6 +137,3 @@ function isListedBS(companyName){
 	}
 	return -1;
 }
-
-/* Exporting the methods defined here. */
-var exports = module.exports = {};
