@@ -10,10 +10,15 @@ var company = require('./models/companySchema').company;
 var article = require('./models/article').article;
 var nasdaq_companies_handler = require('./scripts/nasdaq_companies_handler');
 var country_rating = require('./country_rating');
+var async = require('async');
 
 var alchemy = new AlchemyAPI();
 
-main(['FB']);
+var company_list = ['FB','GOOG'];
+
+// main(company_list);
+
+correct_database();
 
 function main(companyList){
 	companyList.forEach(getCompanyNews);
@@ -33,15 +38,36 @@ function getCompanyNews(companySymbol, index){
 				return console.log('Problem with the company: ' + companySymbol);
 			}
 			// getCompanyFeeds(news);
-			news.forEach(getCompanyFeeds);
-			// console.log(news);
-			// getCompanyRating(news);
-			news.forEach(getCompanyRating);
+			// news.forEach(getCompanyFeeds);
+			async.each(news,
+				function(item){
+					// database_correction_callback(item);
+					getCompanyFeeds(item);
+				},
+				function(err){
+					if(err){
+						console.log('Error async');
+						return console.log(err);
+					}
+					console.log('Finished executing every thread.');
+				});
+			// news.forEach(getCompanyRating);
+			async.each(news,
+				function(item){
+					getCompanyRating(item);
+				},
+				function(err){
+					if(err){
+						console.log('Error async');
+						return console.log(err);
+					}
+					console.log('Finished executing every thread.');
+				});
 			// getCompanyRating(companySymbol, news);
 		});
 }
 
-function getCompanyFeeds(news, index){
+function getCompanyFeeds(news){
 	console.log('Fetching feeds for company.');
 	var main_company_symbol = news.symbol;
 	var url = news['link'];
@@ -93,48 +119,42 @@ function getCompanyFeeds(news, index){
 }
 /* WARNING!!!!!!!!! 5 API CALLS PER ARTICLE */
 function getCompanyRating(news, index){
-	// if(news.length === 0){
-	// 	console.log('News list is empty.');
-	// 	return;
-	// }
+	
 	var main_company_symbol = news.symbol;
-	// for(var i = 0; i < news.length; i++){
-		// if(index > 1){
-		// 	return;
-		// }
-		article.findOne({link:news.link}, function(err, art){
-			if(err){
-				return console.log(err);
-			}
-			// var length = articles.length;
-			if(!art){
-				log(['Article isn\'t in the database.', 'Adding the article : ' + news.title]);
-				// console.log(news);
-				var result_object = buildArticleObject(news);
-				alchemy.text('url', result_object.link, null, function(response) {
+
+	article.findOne({link:news.link}, function(err, art){
+		if(err){
+			return console.log(err);
+		}
+
+		if(!art){
+			log(['Article isn\'t in the database.', 'Adding the article : ' + news.title]);
+
+			var result_object = buildArticleObject(news);
+			alchemy.text('url', result_object.link, null, function(response) {
+
+				if(response['status'] !== 'OK'){
+					console.log(response);
+				}
+				assert.equal(response['status'],'OK');
+				result_object.content = response.text;
+				var t = result_object.content;
+
+				alchemy.sentiment('text',t,null,function(response){
 
 					if(response['status'] !== 'OK'){
 						console.log(response);
 					}
 					assert.equal(response['status'],'OK');
-					result_object.content = response.text;
-					var t = result_object.content;
+					result_object.sentiment = response.docSentiment;
 
-					alchemy.sentiment('text',t,null,function(response){
-
+					alchemy.combined('url', result_object.link, {'sentiment' : 1}, function(response){
 						if(response['status'] !== 'OK'){
 							console.log(response);
 						}
 						assert.equal(response['status'],'OK');
-						result_object.sentiment = response.docSentiment;
-
-						alchemy.combined('url', result_object.link, {'sentiment' : 1}, function(response){
-							if(response['status'] !== 'OK'){
-								console.log(response);
-							}
-							assert.equal(response['status'],'OK');
-							result_object.keywords = response.keywords;
-							result_object.concepts = response.concepts;
+						result_object.keywords = response.keywords;
+						result_object.concepts = response.concepts;
 							// console.log(response);
 							result_object.entities = buildEntityObject(response.entities);
 
@@ -156,20 +176,16 @@ function getCompanyRating(news, index){
 									var new_company = {};
 									new_company.issuer = issuer_name;
 									var oop = nasdaq_companies_handler.company_name_complete_match(new_company.issuer);
-									// console.log('AAAAAAAAAAAAAAAAA\n' + oop);
 									if(oop === -1 || oop.length === 0){
 										oop = nasdaq_companies_handler.company_name_partial_match(item.issuer);
 									}
-									// console.log('AAAAAAAAAAAAAAAAA\n' + oop);
 									if(oop === -1 || oop.length === 0){
 										new_company.details = [];
 									} else {
 										new_company.details = buildCompanyDetailsObject(oop);
 									}
-									// new_company.details = buildCompanyDetailsObject(temp);
 									new_company.company_sentiment = parseFloat(result_object.sentiment.score);
 									new_company.related_to = inter_companyRelations(main_company_symbol,result_object.concepts, news.link);
-									// new_company.country_rating = country_rating.getCountryRating();
 									option = {format: 'aarray',	toNumber: true};
 									yahoo.getKeyStatistics(main_company_symbol, option, function (error, report) {
 										if (error) {
@@ -218,6 +234,156 @@ function getCompanyRating(news, index){
 // }
 }
 
+function correct_database(){
+	// company_list.forEach(database_correction_callback);
+	async.each(company_list,
+		function(item){
+			database_correction_callback(item);
+		},
+		function(err){
+			if(err){
+				console.log('Error async');
+				return console.log(err);
+			}
+			console.log('Finished executing every thread.');
+		});
+}
+
+function database_correction_callback(item){
+	var company_issuer = nasdaq_companies_handler.findIssuer(item);
+	company.find({}, null, null, function(err, companies){
+		console.log('Trying to find company ' + company_issuer);
+		if(err){
+			return console.log(err);
+		}
+		if(companies.length === 0){
+			return;
+		}
+
+		async.each(companies,
+			function(comp){
+				company.find({issuer : comp.issuer},null, null, function(err,comps){
+					if(err){
+						return console.log(err);
+					}
+					if(comps.length === 0){
+						return;
+					}
+					var the_object = new company(buildSingularObject(comps));
+					company.remove({ issuer : comp.issuer}, function(err,removed){
+						if(err){
+							return console.log(err);
+						}
+						console.log(comp.id);
+						companies = removeObjectFromList(companies,comp.id);
+						console.log(removed + ' removed from the collection.');
+						the_object.save(function(err){
+							if(err){
+								console.log('Problem saving the corrected company.');
+								return console.log(err);
+							}
+							console.log('Corrected company saved.');
+						})
+					});
+				});
+			},
+			function(err){
+				if(err){
+					console.log('Error async');
+					return console.log(err);
+				}
+				console.log('Finished executing every thread.');
+			});
+	});
+}
+
+function removeObjectFromList(companies,_id){
+	for(var i = 0; i < companies.length; i++) {
+		if(companies[i]._id === id) {
+			companies.splice(i, 1);
+			i--;
+		}
+	}
+	return companies;
+
+}
+
+function buildSingularObject(companies){
+	var result = {};
+	// console.log(companies);
+	result.issuer = companies[0].issuer;
+	result.company_financial_rating = 0;
+	for(var index = 0; index < companies.length; index++){
+		if(companies[index].company_financial_rating !== 0){
+			result.company_financial_rating = companies[index].company_financial_rating;
+			break;
+		}
+	}
+	/* details object */
+	var new_details = [];
+	for(var index = 0; index < companies.length; index++){
+		var d = companies[index].details;
+		for(var j = 0; j < d.length; j++){
+			var exists = false;
+			for(var i = 0; i < new_details.length; i++){
+				if(d[j].symbol === new_details[i].symbol){
+					exists = true;
+				}
+			}
+			if(!exists){
+				new_details.push(d[j]);
+			}
+		}
+	}
+	result.details = new_details;
+
+	var new_related_to = [];
+	for(var index = 0; index < companies.length; index++){
+		var r = companies[index].related_to;
+		for(var i = 0; i < r.length; i++){
+			var exists = false;
+			for(var j = 0; j < new_related_to.length;j++){
+				if(r[i] === new_related_to[j]){
+					exists = true;
+				}
+			}
+			if(!exists){
+				new_related_to.push(r[i]);
+			}
+		}
+	}
+	result.related_to = new_related_to;
+
+	var new_mentioned_by = [];
+	for(var index = 0; index < companies.length; index++){
+		var m = companies[index].mentioned_by;
+		for(var j = 0; j < m.length; j++){
+			var exists = false;
+			for(var i = 0; i < new_mentioned_by.length; i++){
+				if(m[j] === new_mentioned_by[i]){
+					exists = true;
+				}
+			}
+			if(!exists){
+				new_mentioned_by.push(m[j]);
+			}
+		}
+	}
+	result.mentioned_by = new_mentioned_by;
+
+	var new_company_sentiment = 0;
+	var num = 0;
+	for(var index = 0; index < companies.length; index++){
+		if(companies[index].company_sentiment !== 0){
+			new_company_sentiment += companies[index].company_sentiment;
+			num++;
+		}
+	}
+	result.company_sentiment = new_company_sentiment/num;
+	// console.log(result);
+	return result;
+}
+
 function setCompanySentiment(){
 
 }
@@ -252,11 +418,9 @@ function inter_companyRelations(main_company_symbol, concept_list, link){
 						// console.log(c[0]);
 						_t.issuer = item.issuer;
 						var oop = nasdaq_companies_handler.company_name_complete_match(item.issuer);
-						console.log('AAAAAAAAAAAAAAAAA\n' + oop);
 						if(oop === -1 || oop.length === 0){
 							oop = nasdaq_companies_handler.company_name_partial_match(item.issuer);
 						}
-						console.log('AAAAAAAAAAAAAAAAA\n' + oop);
 						if(oop === -1 || oop.length === 0){
 							_t.details = [];
 						} else {
@@ -270,15 +434,15 @@ function inter_companyRelations(main_company_symbol, concept_list, link){
 									console.log("Successfully added");
 								}
 							});
-						// console.log('The list should be here.AAAAAAAAAAAAAAAAA\n' + c);
-						console.log('The list should be here.AAAAAAAAAAAAAAAAA\n' + _t.details);
 						option = {format: 'aarray',	toNumber: true};
 						yahoo.getKeyStatistics(item.symbol, option, function (error, report) {
 							if (error) {
 								console.log(error); 
 							}
-							_t.company_financial_rating = report['Qtrly Earnings Growth (yoy)'];
-							_t.company_PEG = report['PEG Ratio (5 yr expected)'];
+							if(report){
+								_t.company_financial_rating = report[0]['Qtrly Earnings Growth (yoy)'];
+								_t.company_PEG = report[0]['PEG Ratio (5 yr expected)'];
+							}
 							_t.related_to = main_company_symbol;
 							_t.mentioned_by = [];
 							_t.mentioned_by.push(link);

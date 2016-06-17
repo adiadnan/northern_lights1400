@@ -17,6 +17,7 @@
     "intraday" : "latest",
     "nasdaq-companies" : "latest",
     "google-finance" : "latest",
-    "finance-scraper-js" : "latest"
+    "finance-scraper-js" : "latest",
+    "async" : "latest"
   }
 }
