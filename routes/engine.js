@@ -93,6 +93,10 @@ function getCompanyFeeds(news){
 		}
 		console.log('Feed isn\'t in the DB.');
 		alchemy.feeds('url', url, {}, function(response){
+			if(response['status']!=='OK'){
+				console.log('ALCHEMY STATUS : ' + response['status']);
+				return;
+			}
 			var output = response['feeds'];
 			if(output.length === 0){
 				console.log('Saving new feed in DB.');
@@ -126,6 +130,16 @@ function getCompanyRating(news, index){
 		if(err){
 			return console.log(err);
 		}
+		if(art){
+			log(['Article IS in the database.', 'Parsing article : ' + news.title]);
+			var result_object = buildArticleObject(news);
+			result_object.sentiment = art.sentiment;
+			result_object.keywords = art.keywords;
+			result_object.concepts = art.concepts;
+			result_object.entities = buildEntityObject(art.entities);
+			company_handler(main_company_symbol, news.link, result_object);
+			return;
+		}
 
 		if(!art){
 			log(['Article isn\'t in the database.', 'Adding the article : ' + news.title]);
@@ -133,79 +147,91 @@ function getCompanyRating(news, index){
 			var result_object = buildArticleObject(news);
 			alchemy.text('url', result_object.link, null, function(response) {
 
-				if(response['status'] !== 'OK'){
-					console.log(response);
+				if(response['status']!=='OK'){
+					console.log('ALCHEMY STATUS : ' + response['status']);
+					return;
 				}
-				assert.equal(response['status'],'OK');
 				result_object.content = response.text;
 				var t = result_object.content;
 
 				alchemy.sentiment('text',t,null,function(response){
 
-					if(response['status'] !== 'OK'){
-						console.log(response);
+					if(response['status']!=='OK'){
+						console.log('ALCHEMY STATUS : ' + response['status']);
+						return;
 					}
-					assert.equal(response['status'],'OK');
 					result_object.sentiment = response.docSentiment;
 
 					alchemy.combined('url', result_object.link, {'sentiment' : 1}, function(response){
-						if(response['status'] !== 'OK'){
-							console.log(response);
+						if(response['status']!=='OK'){
+							console.log('ALCHEMY STATUS : ' + response['status']);
+							return;
 						}
-						assert.equal(response['status'],'OK');
 						result_object.keywords = response.keywords;
 						result_object.concepts = response.concepts;
-							// console.log(response);
-							result_object.entities = buildEntityObject(response.entities);
+						// console.log(response);
+						result_object.entities = buildEntityObject(response.entities);
 
-							var new_article = new article(result_object);
-							new_article.save(function(err){
-								if(err){
-									return console.log(err);
-								}
-								console.log('Saved article to DB.');
-							});
-							var issuer_name = nasdaq_companies_handler.findIssuer(main_company_symbol);
-							company.findOne({issuer : issuer_name}, function(err, com){
-								console.log('Trying to find company ' + issuer_name);
-								if(err){
-									return console.log(err);
-								}
-								if(!com){
-									console.log('Company isn\'t in the database.');
-									var new_company = {};
-									new_company.issuer = issuer_name;
-									var oop = nasdaq_companies_handler.company_name_complete_match(new_company.issuer);
-									if(oop === -1 || oop.length === 0){
-										oop = nasdaq_companies_handler.company_name_partial_match(item.issuer);
-									}
-									if(oop === -1 || oop.length === 0){
-										new_company.details = [];
-									} else {
-										new_company.details = buildCompanyDetailsObject(oop);
-									}
-									new_company.company_sentiment = parseFloat(result_object.sentiment.score);
-									new_company.related_to = inter_companyRelations(main_company_symbol,result_object.concepts, news.link);
-									option = {format: 'aarray',	toNumber: true};
-									yahoo.getKeyStatistics(main_company_symbol, option, function (error, report) {
-										if (error) {
-											console.log(error);
-										}
-										new_company.company_financial_rating = report[0]['Qtrly Earnings Growth (yoy)'];
-										new_company.company_PEG = report[0]['PEG Ratio (5 yr expected)'];
-										new_company.mentioned_by = [];
-										new_company.mentioned_by.push(news.link);
-										var sn = new company(new_company);
-										sn.save(function(err){
-											if(err){
-												return console.log('Problem saving the new company.');
-											}
-											console.log('New company successfully saved.');
-										});
-									});
-									return;
-								}
-								console.log('Company is in the database.');
+						var new_article = new article(result_object);
+						new_article.save(function(err){
+							if(err){
+								return console.log(err);
+							}
+							console.log('Saved article to DB.');
+						});
+							///
+							company_handler(main_company_symbol, news.link, result_object);
+						});
+				});
+			});
+}
+
+});
+// }
+}
+
+function company_handler(main_company_symbol, link, result_object){
+	var issuer_name = nasdaq_companies_handler.findIssuer(main_company_symbol);
+	company.findOne({issuer : issuer_name}, function(err, com){
+		console.log('Trying to find company ' + issuer_name);
+		if(err){
+			return console.log(err);
+		}
+		if(!com){
+			console.log('Company isn\'t in the database.');
+			var new_company = {};
+			new_company.issuer = issuer_name;
+			var oop = nasdaq_companies_handler.company_name_complete_match(new_company.issuer);
+			if(oop === -1 || oop.length === 0){
+				oop = nasdaq_companies_handler.company_name_partial_match(item.issuer);
+			}
+			if(oop === -1 || oop.length === 0){
+				new_company.details = [];
+			} else {
+				new_company.details = buildCompanyDetailsObject(oop);
+			}
+			new_company.company_sentiment = parseFloat(result_object.sentiment.score);
+			new_company.related_to = inter_companyRelations(main_company_symbol,result_object.concepts, link);
+			option = {format: 'aarray',	toNumber: true};
+			yahoo.getKeyStatistics(main_company_symbol, option, function (error, report) {
+				if (error) {
+					console.log(error);
+				}
+				new_company.company_financial_rating = report[0]['Qtrly Earnings Growth (yoy)'];
+				new_company.company_PEG = report[0]['PEG Ratio (5 yr expected)'];
+				new_company.mentioned_by = [];
+				new_company.mentioned_by.push(link);
+				var sn = new company(new_company);
+				sn.save(function(err){
+					if(err){
+						return console.log('Problem saving the new company.');
+					}
+					console.log('New company successfully saved.');
+				});
+			});
+			return;
+		}
+		console.log('Company is in the database.');
 								// var avg;
 								// if(com.company_sentiment !== 0){
 								// 	avg = (com.company_sentiment + result_object.sentiment)/2;
@@ -226,12 +252,6 @@ function getCompanyRating(news, index){
 								// 	console.log(num + ' rows updated.');
 								// });
 });
-});
-});
-});
-}
-});
-// }
 }
 
 function correct_database(){
@@ -251,57 +271,57 @@ function correct_database(){
 
 function database_correction_callback(item){
 	var company_issuer = nasdaq_companies_handler.findIssuer(item);
-	company.find({}, null, null, function(err, companies){
-		console.log('Trying to find company ' + company_issuer);
-		if(err){
-			return console.log(err);
-		}
-		if(companies.length === 0){
-			return;
-		}
+	// company.find({}, null, null, function(err, companies){
+		// console.log('Trying to find company ' + company_issuer);
+		// if(err){
+		// 	return console.log(err);
+		// }
+		// if(companies.length === 0){
+		// 	return;
+		// }
 
-		async.each(companies,
-			function(comp){
-				company.find({issuer : comp.issuer},null, null, function(err,comps){
+		// async.each(companies, function(comp){
+			company.find({issuer : company_issuer},null, null, function(err,comps){
+				if(err){
+					return console.log(err);
+				}
+				if(comps.length === 0){
+					return;
+				}
+				var the_object = new company(buildSingularObject(comps));
+				company.remove({ issuer : company_issuer}, function(err,removed){
 					if(err){
 						return console.log(err);
 					}
-					if(comps.length === 0){
-						return;
-					}
-					var the_object = new company(buildSingularObject(comps));
-					company.remove({ issuer : comp.issuer}, function(err,removed){
+					// console.log(comp.id);
+					// companies = removeObjectFromList(companies,comp.id);
+					console.log(removed + ' removed from the collection.');
+					the_object.save(function(err){
 						if(err){
+							console.log('Problem saving the corrected company.');
 							return console.log(err);
 						}
-						console.log(comp.id);
-						companies = removeObjectFromList(companies,comp.id);
-						console.log(removed + ' removed from the collection.');
-						the_object.save(function(err){
-							if(err){
-								console.log('Problem saving the corrected company.');
-								return console.log(err);
-							}
-							console.log('Corrected company saved.');
-						})
-					});
+						console.log('Corrected company saved.');
+					})
 				});
-			},
-			function(err){
-				if(err){
-					console.log('Error async');
-					return console.log(err);
-				}
-				console.log('Finished executing every thread.');
 			});
-	});
+		// },
+		// function(err){
+		// 	if(err){
+		// 		console.log('Error async');
+		// 		return console.log(err);
+		// 	}
+		// 	console.log('Finished executing every thread.');
+		// });
+	// });
 }
 
-function removeObjectFromList(companies,_id){
+function removeObjectFromList(companies,id){
 	for(var i = 0; i < companies.length; i++) {
 		if(companies[i]._id === id) {
 			companies.splice(i, 1);
 			i--;
+			console.log('ERASED : ' + companies[i].issuer);
 		}
 	}
 	return companies;
@@ -313,6 +333,13 @@ function buildSingularObject(companies){
 	// console.log(companies);
 	result.issuer = companies[0].issuer;
 	result.company_financial_rating = 0;
+	
+	for(var index = 0; index < companies.length; index++){
+		if(companies[index].company_PEG){
+			result.company_PEG = companies[index].company_PEG;
+			break;
+		}
+	}
 	for(var index = 0; index < companies.length; index++){
 		if(companies[index].company_financial_rating !== 0){
 			result.company_financial_rating = companies[index].company_financial_rating;
@@ -408,69 +435,12 @@ function inter_companyRelations(main_company_symbol, concept_list, link){
 			continue;
 		}
 		if(c[0].issuer !== issuer){
-			c.forEach(function(item, index){
-				company.findOne({issuer : item.issuer}, function(err, com){
-					if(err){
-						return log(['Problem finding company', 'No relations established with ' + item.issuer + '.']);
-					}
-					if(!com){
-						var _t = {};
-						// console.log(c[0]);
-						_t.issuer = item.issuer;
-						var oop = nasdaq_companies_handler.company_name_complete_match(item.issuer);
-						if(oop === -1 || oop.length === 0){
-							oop = nasdaq_companies_handler.company_name_partial_match(item.issuer);
-						}
-						if(oop === -1 || oop.length === 0){
-							_t.details = [];
-						} else {
-							_t.details = buildCompanyDetailsObject(oop);
-						}
-						company.update({issuer : issuer},{
-							$push : {related_to : _t.details[0].symbol}},{upsert:true},function(err){
-								if(err){
-									console.log(err);
-								}else{
-									console.log("Successfully added");
-								}
-							});
-						option = {format: 'aarray',	toNumber: true};
-						yahoo.getKeyStatistics(item.symbol, option, function (error, report) {
-							if (error) {
-								console.log(error); 
-							}
-							if(report){
-								_t.company_financial_rating = report[0]['Qtrly Earnings Growth (yoy)'];
-								_t.company_PEG = report[0]['PEG Ratio (5 yr expected)'];
-							}
-							_t.related_to = main_company_symbol;
-							_t.mentioned_by = [];
-							_t.mentioned_by.push(link);
-							var n_company = new company(_t);
-							n_company.save(function(err){
-								if(err){
-									return console.log('Problem adding the baby company.');
-								}
-								log(['New company successfully added.',_t]);
-							});
-						});
-						return;
-					}
-					var y = updateCompanyLinkList(com.issuer,com.mentioned_by,link);
-					if(y !== -1){
-						com.mentioned_by = y;
-						com.related_to.push(main_company_symbol);
-						com.save();
-					}
-				});
-});
-for(var j = 0; j < c.length; j++){
-	result.push(c[j].symbol);
-}
-}
-}
-// console.log(result);
-return result;
+			for(var j = 0; j < c.length; j++){
+				result.push(c[j].symbol);
+			}
+		}
+	}
+	return result;
 }
 
 function updateCompanyLinkList(issuer, link_list, link){
