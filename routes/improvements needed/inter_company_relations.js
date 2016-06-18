@@ -41,7 +41,7 @@ function inter_companyRelations(main_company_symbol, concept_list, link){
 									console.log("Successfully added");
 								}
 							});
-						option = {format: 'aarray',	toNumber: true};
+						var option = {format: 'aarray',	toNumber: true};
 						yahoo.getKeyStatistics(item.symbol, option, function (error, report) {
 							if (error) {
 								console.log(error); 
