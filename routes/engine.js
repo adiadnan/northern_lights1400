@@ -32,7 +32,7 @@ colors.setTheme({
 });
 // console.log('THIS IS AWESOME'.silly);
 
-// main(COMPANY_LIST);
+// // main(COMPANY_LIST);
 
 // correct_database();
 
@@ -151,7 +151,7 @@ function getCompanyFeeds(news){
 		});
 	});
 }
-/* WARNING!!!!!!!!! 5 API CALLS PER ARTICLE */
+/* WARNING!!!!!!!!! 15 API CALLS PER ARTICLE */
 function getCompanyRating(news, index){
 	
 	var main_company_symbol = news.symbol;
@@ -280,6 +280,7 @@ function company_handler(main_company_symbol, link, result_object){
 				}
 				if(oop === -1 || oop.length === 0){
 					new_company.details = [];
+					console.log('Company isn\'t worth adding to the DB.'.info);
 					return;
 				} else {
 					new_company.details = buildCompanyDetailsObject(oop);
@@ -441,65 +442,125 @@ function correct_database(){
 				console.log('Database is empty, aparently.'.rainbow);
 				return;
 			}
-			debugger;
-			var new_companies_list = [];
-			var parsed_companies = [];
-			for(var index = 0; index < companies.length - 1; index++){
-				var parsed = false;
-				for(var j = 0; j < parsed_companies.length; j++){
-					if(companies[index].issuer === parsed_companies[j]){
-						parsed = true;
-					}
-				}
-				if(parsed == false){
-					var tempSet = [];
-					for(var g = index; g < companies.length; g++){
-						if(companies[index].issuer === companies[g].issuer){
-							tempSet.push({
-								issuer: companies[g].issuer,
-								mentioned_by: companies[g].mentioned_by,
-								related_to: companies[g].related_to,
-								daily_rating: companies[g].daily_rating,
-								company_rating: companies[g].company_rating,
-								related_stock: companies[g].related_stock,
-								country_rating: companies[g].country_rating,
-								company_PEG: companies[g].company_PEG,
-								company_sentiment: companies[g].company_sentiment,
-								company_financial_rating: companies[g].company_financial_rating,
-								details: companies[g].details
-							});
-						}
-					}
-					parsed_companies.push(companies[index].issuer);
-					new_companies_list.push(buildSingularObject(tempSet));
-				}
-			}
-			debugger;
-			company.remove({}, function(err, removed){
-				if(err){
-					return console.log(err);
-				}
-				// if(removed.ok !== 1){
-				// 	console.log('Problem removing all the companies.'.error);
-				// } else {
-				// 	console.log(removed.n + ' companies successfully removed.');
-				// }
-				console.log(('Removed the entire collection.').info);
-			});
-			debugger;
-			for(var index = 0; index < new_companies_list.length; index++){
-				console.log(new_companies_list[index].company_sentiment);
-				var new_company = new company(new_companies_list[index]);
-				new_company.save(function(err){
+			async.parallel([
+				function(){
+					update_related_stock_entries(companies)
+				}],
+				function(err){
 					if(err){
-						console.log('Problem saving the corrected company.'.error);
-						return console.log(err);
+						console.log(err);
+						return;
 					}
-					console.log('Company saved.'.info);
+					update_related_stock_entries(companies)
 				});
-			}
-			debugger;
 		});
+}
+
+function correct_database_entries(companies){
+	var new_companies_list = [];
+	var parsed_companies = [];
+	for(var index = 0; index < companies.length - 1; index++){
+		var parsed = false;
+		for(var j = 0; j < parsed_companies.length; j++){
+			if(companies[index].issuer === parsed_companies[j]){
+				parsed = true;
+			}
+		}
+		if(parsed == false){
+			var tempSet = [];
+			for(var g = index; g < companies.length; g++){
+				if(companies[index].issuer === companies[g].issuer){
+					tempSet.push({
+						issuer: companies[g].issuer,
+						mentioned_by: companies[g].mentioned_by,
+						related_to: companies[g].related_to,
+						daily_rating: companies[g].daily_rating,
+						company_rating: companies[g].company_rating,
+						related_stock: companies[g].related_stock,
+						country_rating: companies[g].country_rating,
+						company_PEG: companies[g].company_PEG,
+						company_sentiment: companies[g].company_sentiment,
+						company_financial_rating: companies[g].company_financial_rating,
+						details: companies[g].details
+					});
+				}
+			}
+			parsed_companies.push(companies[index].issuer);
+			new_companies_list.push(buildSingularObject(tempSet));
+		}
+	}
+	debugger;
+	company.remove({}, function(err, removed){
+		if(err){
+			return console.log(err);
+		}
+		console.log(('Removed the entire collection.').info);
+	});
+	debugger;
+	for(var index = 0; index < new_companies_list.length; index++){
+		console.log(new_companies_list[index].company_sentiment);
+		var new_company = new company(new_companies_list[index]);
+		new_company.save(function(err){
+			if(err){
+				console.log('Problem saving the corrected company.'.error);
+				return console.log(err);
+			}
+			console.log('Company saved.'.info);
+		});
+	}
+	debugger;
+}
+
+function update_related_stock_entries(companies){
+	var parsed_companies = [];
+	for(var index = 0; index < companies.length - 1; index++){
+		var parsed = false;
+		for(var j = 0; j < parsed_companies.length; j++){
+			if(companies[index].issuer === parsed_companies[j]){
+				parsed = true;
+			}
+		}
+		if(parsed == false){
+			var new_or = [];
+			console.log('Finding for ' + companies[index].issuer);
+			var temp = [companies[index]];
+			temp.forEach(function(item, index){
+				company.where('details.symbol').in(item.related_to)
+				.exec(
+					function(err, cs){
+						var avg = 0;
+						var num = 0;
+						for(var i =0; i < cs.length; i++){
+							if(cs[i].company_sentiment !== 0){
+								avg += cs[i].company_sentiment;
+								num++
+							}
+						}
+						if(avg !== 0 && num !== 0){
+							avg = avg / num;
+							if(item.related_stock === avg){
+								console.log('Related stock index same as before. Skiping update.'.info);
+								return;
+							}
+							company.update({issuer: item.issuer}, {related_stock: avg},
+								function(err, num){
+									if(err){
+										console.log(err);
+										return console.log('Problem updating the database.'.error);
+									}
+									if(num === 0){
+										console.log('No document updated. '.error);
+										return;
+									}
+									console.log(('Index updated for company ' + item.issuer).info);
+								});
+							return;
+						}
+					});
+			});
+			parsed_companies.push(companies[index].issuer);
+		}
+	}
 }
 
 function removeObjectFromList(companies,id){
