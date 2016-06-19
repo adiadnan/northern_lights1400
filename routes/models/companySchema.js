@@ -13,7 +13,7 @@ var companySchema = new Schema({
 	String
 	],
 	company_financial_rating : {type : Number, default : 0},/* checked */
-	company_sentiment : [{type : Number, default : 0}],/* checked *//* CC */
+	company_sentiment : {type : Number, default : 0},/* checked *//* CC */
 	company_PEG : {type : Number, default : 0},/* checked */
 	country_rating : {type : Number, default : country_rating.getRating()},/* checked */
 	related_stock : {type : Number, default : 0},/* CC */

@@ -6,7 +6,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var financial_data_schema = new Schema({
-	symbol: {type: String},
 	data : [
 	{
 		date: {type: String},
