@@ -59,7 +59,6 @@ function replace_redundancies(string){
 }
 
 exports.company_name_complete_match = function(name){
-	console.log('Starting complete_match search.');
 	var result = [];
 	for(var index = 0; index < nasdaq_companies.length; index++){
 		var string = nasdaq_companies[index].issuer;
@@ -67,12 +66,10 @@ exports.company_name_complete_match = function(name){
 			result.push(nasdaq_companies[index]);
 		}
 	}
-	console.log('Search returned ' + result.length + ' matches.');
 	return result;
 }
 
 exports.company_name_partial_match = function(name){
-	console.log('Starting partial_match search.');
 	var result = [];
 	var max_ratio = 0;
 	var s = '';
@@ -102,17 +99,8 @@ exports.company_name_partial_match = function(name){
 		}
 	}
 	if(good == true){
-		console.log('Search returned ' + result.length + ' matches.');
-		console.log('Search accuracy ' + ratio);
-		console.log('Search string length : ' + name.length);
-		console.log('Comparison string length : ' + result[0].issuer.length);
 		return result;
-	} else {
-		console.log('No high accuracy matches worth noticing.');
-		// console.log('Search string length : ' + name.length);
-		// console.log('Comparison string length : ' + replace_redundancies(result[0].issuer).length);
 	}
-
 	return -1;
 }
 
