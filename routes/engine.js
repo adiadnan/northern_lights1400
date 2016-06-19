@@ -298,6 +298,7 @@ function company_handler(main_company_symbol, link, result_object, cm){
 					return;
 				}
 				var macd_data = macd(quotes, new_val);
+				update_company_list(temp);
 				company.update({issuer: issuer_name},
 				{
 					company_sentiment : new_val,
@@ -324,8 +325,6 @@ function company_handler(main_company_symbol, link, result_object, cm){
 						console.log('No document updated. '.error);
 						return;
 					}
-					COMPANY_LIST.concat(oop);
-					console.log(COMPANY_LIST);
 					console.log('Company updated.'.info);
 				});
 			});
@@ -400,7 +399,7 @@ function insertCompaniesRelatedToMainCompany(main_company_symbol, link, c){
 					if(oop){
 						googleFinance.historical({
 							symbol : item.symbol,
-							from : '2016'
+							from : '2016-01-01'
 						},
 						function(err, quotes){
 							if(err){
@@ -412,6 +411,7 @@ function insertCompaniesRelatedToMainCompany(main_company_symbol, link, c){
 								return;
 							}
 							var macd_data = macd(quotes, 0);
+							update_company_list(_t.details);
 							company.update({issuer: _t.issuer},
 							{
 								$addToSet : {
@@ -575,9 +575,10 @@ function add_stock_financial_data(companies){
 		}
 		if(parsed == false){
 			// item.details.forEach(function(it, ind){
+
 				googleFinance.historical({
 					symbols : item.details,
-					from: '2016' 
+					from: '2016-01-01' 
 				},
 				function(err, quotes){
 					if(err){
@@ -675,7 +676,8 @@ function update_company_list(related_to){
 			}
 		}
 		if(!found){
-			COMPANY_LIST.push(related_to[j]);
+			COMPANY_LIST = COMPANY_LIST.concat(related_to[j]);
+			console.log(COMPANY_LIST);
 		}
 	}
 }
