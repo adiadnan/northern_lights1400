@@ -1,0 +1,14 @@
+.tooltip {
+  outline: none;
+  width: 120px;
+  min-width: 120px;
+  max-width: 255px;
+}
+
+.tooltip .tool-content {
+  margin:0;
+  padding:0;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+}

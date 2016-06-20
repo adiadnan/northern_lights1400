@@ -1,0 +1,153 @@
+<div class="container-fluid">
+	<div id="main_population" class="col-sm-11 col-sm-offset-1" style="position:relative;top:45px;left:45px">
+		<div class="main_company_content_area">
+			<div id="wid_limit" class="company_details">
+				<div class="page-header">
+					<h1>
+						<%=issuer %>
+						<small>
+							[<% for(var i = 0; i<details.length; i++){%>
+							<%= details[i] %>
+							<% if(i !== details.length - 1) {%>
+							,
+							<% } %>
+							<% } %>]
+						</small>
+					</h1>
+				</div>
+
+				<% if(company_sentiment < 0) { %>
+				<div id="wid_limit" class="alert alert-danger" role="alert">
+					Current company sentiment
+					<span style="float:right;margin-right:8px">
+						<%=company_sentiment.toPrecision(5)%>
+					</span>
+				</div>
+				<% } else if(company_sentiment > 0){ %>
+				<div id="wid_limit" class="alert alert-success" role="alert">
+					Current company sentiment
+					<span style="float:right">
+						<%=company_sentiment.toPrecision(5)%>
+					</span>
+				</div>
+				<% } else { %>
+				<div id="wid_limit" class="alert alert-info" role="alert">
+					Current company sentiment
+					<span style="float:right">
+						<%=company_sentiment.toPrecision(5)%>
+					</span>
+				</div>
+				<% }%>
+				<% if(daily_rating < 0) { %>
+				<div id="wid_limit" class="alert alert-danger" role="alert">
+					Daily rating :
+					<% var u = calculateIncreaseDecrease(latest_prediction[1],latest_prediction[0]) %>
+					<% if(u > 150){%>
+					<b>strong investment</b>
+					<% } else if(u < 150 && u > 0){%>
+					<b>invest on your own risk</b>
+					<% } else if(u < 0) {%>
+					<b>don't invest</b>
+					<% } %>
+					<% if(latest_prediction[1] > latest_prediction[0]){%> 					
+					<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
+					<% } else if(latest_prediction[1] < latest_prediction[0]){%>
+					<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true"></span>
+					<% } else {%>
+					<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
+					<% } %>
+					<span style="float:right;margin-right:8px">
+						<%=daily_rating.toPrecision(5)%>
+					</span>
+				</div>
+				<% } else if(daily_rating > 0){ %>
+				<div id="wid_limit" class="alert alert-success" role="alert">
+					Daily rating 
+					<% if(latest_prediction[1] > latest_prediction[0]){%> 					
+					<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
+					<% } else if(latest_prediction[1] < latest_prediction[0]){%>
+					<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true"></span>
+					<% } else {%>
+					<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
+					<% } %>
+					<span style="float:right">
+						<%=daily_rating.toPrecision(5)%>
+					</span>
+				</div>
+				<% } else { %>
+				Daily rating 
+				<div id="wid_limit" class="alert alert-info" role="alert">
+					Daily rating 
+					<% if(latest_prediction[1] > latest_prediction[0]){%> 					
+					<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
+					<% } else if(latest_prediction[1] < latest_prediction[0]){%>
+					<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true"></span>
+					<% } else {%>
+					<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
+					<% } %>
+					<span style="float:right">
+						<%=daily_rating.toPrecision(5)%>
+					</span>
+				</div>
+				<% }%>
+			</div>
+			<ul class="col-sm-8 nav nav-tabs">
+				<li role="presentation" id="mc_button1" class="active">
+					<a href="#">articles</a>
+				</li>
+				<li role="presentation" id="mc_button2"><a href="#">stock chart</a></li>
+				<li role="presentation" id="mc_button3"><a href="#">financial data</a></li>
+			</ul>
+			<div class="col-sm-8 custom-main-panel">
+				<% if(articles.length === 0){%>
+				<div class="alert alert-warning" role="alert">This company has no articles! :(</div>
+				<% } else { %>
+				<% for(var i =0; i < articles.length; i++) {%>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							<a href="articles?=<%=articles[i].id%>">
+								<h5>
+									<%= articles[i].title %>
+									<h5>
+									</a>
+									<small><%= timeSince(new Date(articles[i].date)) %></small>
+								</h3>
+							</div>
+							<div class="panel-body">
+								<div class="news_description">
+									<span class="news_desc_area">
+										Description: <%= articles[i].description %>
+									</span>
+								</div>
+								<div class="news_sentiment">
+									<span class="news_sentiment_area">
+										Sentiment:
+										<% if(articles[i].sentiment.score > 0){%>
+										<span style="color:green">
+											<%= articles[i].sentiment.score %>
+										</span>
+										<% } else if(articles[i].sentiment.score < 0){%>
+										<span style="color:red">
+											<%= articles[i].sentiment.score %>
+										</span>
+										<% } else {%>
+										<span style="color:#3b5998">
+											<%= articles[i].sentiment.score %>
+										</span>
+										<% } %>
+									</span>
+								</div>
+								<div class="news_link">
+									<span class="news_link_area">
+										Article: <a href="<%= articles[i].link %>">here</a>
+									</span>
+								</div>
+							</div>
+						</div>
+						<% } %>
+						<% } %>
+					</div>
+				</div>
+			</div>
+		</div>

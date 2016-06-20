@@ -1,0 +1,45 @@
+<div class="container-fluid">
+  <div id="main_population" class="col-sm-11 col-sm-offset-1" style="position:relative;top:45px;left:45px">
+    <ul class="col-sm-8 nav nav-tabs">
+      <li role="presentation" id="button-action1" class="active">
+        <a href="#">Hot</a>
+      </li>
+      <li role="presentation" id="button-action2" onclick="changeState(this)"><a href="#">Recommended for you</a></li>
+      <li role="presentation" id="button-action3" onclick="changeState(this)"><a href="#">Tags</a></li>
+    </ul>
+    <div class="col-sm-8 custom-main-panel">
+      <%if(relevant_data.length === 0){%>
+      <div class="well well-lg" style="align:center">
+        <span>
+          No relevant data to show.
+        </span>
+      </div>
+      <% } else { %>
+      <% for(var i = 0; i < relevant_data.length; i++){%>
+      <div class="well well-sm">
+        <span class="left_wall">
+          <a href="/companies?sym=<%=relevant_data[i].id%>">
+            <%= relevant_data[i].issuer %>
+          </a>
+        </span>
+        <div class="right_wall">
+          <span class="r_wall_number">
+            <a id="_rw_number" href="/companies?sym=<%=relevant_data[i].id%>">
+             <%= relevant_data[i].daily_rating.toPrecision(5) %>
+           </a>
+         </span>
+         <% if(relevant_data[i].daily_rating > 0){ %>
+         <span class="glyphicon glyphicon-arrow-up" aria-hidden="true">
+         </span>
+         <% } else if(relevant_data[i].daily_rating < 0){ %>
+         <span class="glyphicon glyphicon-arrow-down" aria-hidden="true">
+         </span>
+         <% } %>
+       </div>
+     </div>
+     <% } %>
+     <% } %>
+   </div>
+ </div>
+</div>
+</div>

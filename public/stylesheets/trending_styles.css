@@ -1,0 +1,18 @@
+.left_wall{
+	margin-left:16px;
+}
+.right_wall{
+	float:right;
+	display:inline;
+	margin-right:10px;
+}
+.r_wall_number{
+	margin-left:10px;
+}
+.r_arr{
+	margin-right:10px;
+}
+#_rw_number{
+	color:green;
+	margin-right:7px;
+}

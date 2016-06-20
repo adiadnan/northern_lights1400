@@ -1,0 +1,60 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/"><img src="/images/FiiGeek.jpg" style="max-width:60px;max-height:35px;margin: -10px;"/></a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <div class="col-sm-6 col-sm-offset-1" style="width:auto;margin-left:0">
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search" style="width:400px">
+          </div>
+          <button type="submit" class="btn btn-default">
+          search
+          </button>
+        </form>
+      </div>
+      <div class="col-sm-4">
+        <ul class="nav navbar-nav navbar-right">
+          <li class="add-discussion">
+            <a href="/threads/add" class="navbar-brand">
+              <span style="font-size:14px">
+                Add a discussions
+              </span>
+              <span class="glyphicon glyphicon-upload sbp">
+              </span>
+            </a>
+          </li>
+          <li class="add-discussion">
+            <a href="/threads/stats" class="navbar-brand">
+              <span style="font-size:14px">
+                Statistics
+              </span>
+            </a>
+          </li>
+          <li class="dropdown safe-distance">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+              <%= userInfo['_id']+"@"+userInfo.email %>
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="/users/settings">Account settings</a></li>
+              <li><a href="#">Help</a></li>
+              <li class="divider"></li>
+              <li><a href="/users/logout">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+      
+    </nav>

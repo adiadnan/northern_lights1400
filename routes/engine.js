@@ -18,7 +18,7 @@ const colors = require('colors');
 
 const alchemy = new AlchemyAPI();
 
-var COMPANY_LIST = ['GOOG'];
+var COMPANY_LIST = ['NFLX'];
 
 colors.setTheme({
 	silly: 'rainbow',
@@ -259,6 +259,7 @@ function company_handler(main_company_symbol, link, result_object, cm){
 			oop = buildCompanyDetailsObject(oop);
 		}
 		var temp = inter_companyRelations(main_company_symbol, result_object.entities, link);
+		// update_company_list(temp);
 		new_company.company_financial_rating = 0;
 		new_company.company_PEG = 0;
 		if(report){
@@ -298,7 +299,6 @@ function company_handler(main_company_symbol, link, result_object, cm){
 					return;
 				}
 				var macd_data = macd(quotes, new_val);
-				update_company_list(temp);
 				company.update({issuer: issuer_name},
 				{
 					company_sentiment : new_val,
@@ -411,7 +411,7 @@ function insertCompaniesRelatedToMainCompany(main_company_symbol, link, c){
 								return;
 							}
 							var macd_data = macd(quotes, 0);
-							update_company_list(_t.details);
+							// update_company_list(_t.details);
 							company.update({issuer: _t.issuer},
 							{
 								$addToSet : {
@@ -437,50 +437,6 @@ function insertCompaniesRelatedToMainCompany(main_company_symbol, link, c){
 							});
 						});
 }
-			// 		googleFinance.historical({
-			// 	symbol : main_company_symbol,
-			// 	from : '2016'
-			// },
-			// function(err, quotes){
-			// 	if(err){
-			// 		console.log('Problem fetching historical data.'.error);
-			// 		console.log(err);
-			// 		return;
-			// 	}
-			// 	if(!quotes.length){
-			// 		return;
-			// 	}
-			// 	var macd_data = macd(quotes, new_val);
-			// 	company.update({issuer: issuer_name},
-			// 	{
-			// 		company_sentiment : new_val,
-			// 		$addToSet : {
-			// 			related_to: {
-			// 				$each: temp
-			// 			},
-			// 			mentioned_by: {
-			// 				$each: [link]
-			// 			},
-			// 			details: { $each: oop}
-			// 		},
-			// 		daily_rating: macd_data[macd_data.length - 1],
-			// 		company_financial_rating: new_company.company_financial_rating,
-			// 		company_PEG: new_company.company_PEG
-			// 	},{
-			// 		upsert: true
-			// 	}, function(err, num){
-			// 		if(err){
-			// 			console.log(err);
-			// 			return console.log('Problem updating the database.'.error);
-			// 		}
-			// 		if(num === 0){
-			// 			console.log('No document updated. '.error);
-			// 			return;
-			// 		}
-			// 		console.log('Company updated.'.info);
-			// 	});
-			// });
-
 });
 });
 }
@@ -668,16 +624,17 @@ function update_company_list(related_to){
 	if(related_to.length === 0){
 		return;
 	}
-	for(var i = 0; i < COMPANY_LIST.length; i++){
+	var length = COMPANY_LIST.length;
+	for(var i = 0; i < related_to.length; i++){
 		var found = false;
-		for(var j = 0; j < related_to.length; j++){
-			if(COMPANY_LIST[i] === related_to[j]){
+		for(var j = 0; j < length; j++){
+			if(COMPANY_LIST[j] === related_to[i]){
 				found = true;
 			}
 		}
-		if(!found){
-			COMPANY_LIST = COMPANY_LIST.concat(related_to[j]);
+		if(found === false){
 			console.log(COMPANY_LIST);
+			COMPANY_LIST.push(related_to[i]);
 		}
 	}
 }
