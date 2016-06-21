@@ -24,22 +24,30 @@
         </span>
         <div class="right_wall">
           <span class="r_wall_number">
-            <a id="_rw_number" href="/companies?sym=<%=relevant_data[i].id%>">
+            <% if(relevant_data[i].daily_rating > 0){%>
+            <a id="_rw_numbe" href="/companies?sym=<%=relevant_data[i].id%>" style="color:green">
              <%= relevant_data[i].daily_rating.toPrecision(5) %>
-           </a>
-         </span>
-         <% if(relevant_data[i].daily_rating > 0){ %>
-         <span class="glyphicon glyphicon-arrow-up" aria-hidden="true">
-         </span>
-         <% } else if(relevant_data[i].daily_rating < 0){ %>
-         <span class="glyphicon glyphicon-arrow-down" aria-hidden="true">
-         </span>
+             <%} else if(relevant_data[i].daily_rating < 0) {%>
+             <a id="_rw_numbe" href="/companies?sym=<%=relevant_data[i].id%>" style="color:red">
+               <%= relevant_data[i].daily_rating.toPrecision(5) %>
+               <% } else {%>
+               <a id="_rw_numbe" href="/companies?sym=<%=relevant_data[i].id%>" style="color:blue">
+                 <%= relevant_data[i].daily_rating.toPrecision(5) %>
+                 <% } %>
+               </a>
+             </span>
+             <% if(relevant_data[i].daily_rating > 0){ %>
+             <span class="glyphicon glyphicon-arrow-up" aria-hidden="true">
+             </span>
+             <% } else if(relevant_data[i].daily_rating < 0){ %>
+             <span class="glyphicon glyphicon-arrow-down" aria-hidden="true">
+             </span>
+             <% } %>
+           </div>
+         </div>
+         <% } %>
          <% } %>
        </div>
      </div>
-     <% } %>
-     <% } %>
    </div>
  </div>
-</div>
-</div>

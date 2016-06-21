@@ -1,0 +1,88 @@
+<div class="container-fluid">
+	<div id="main_population" class="col-sm-11 col-sm-offset-1" style="position:relative;top:45px;left:45px">
+		<div class="main_company_content_area">
+			<div id="wid_limit" class="company_details">
+				<div class="page-header">
+					<h2>
+						<span id="com_issuer">
+							<a href="<%=relevant_data.link%>" ceva="<%=relevant_data.id%>">
+								<%= relevant_data.title%>
+							</a>
+						</span>
+					</h2>
+					<div id="title_timelapse">
+						<h5>
+							Posted 
+							<%=timeSince(new Date(relevant_data.date))%>
+						</h5>
+					</div>
+				</div>
+				<div class="news_sentiment">
+					<span class="news_sentiment_area" style="font-size:16px">
+						<%= relevant_data.content%>
+					</span>
+				</div>
+				<div class="news_sentiment" style="margin-top:15px">
+					Overall text sentiment
+					<span class="news_sentiment_area" style="font-size:16px">
+						<%= relevant_data.sentiment.score%>
+					</span>
+				</div>
+				<div class="news_sentiment" style="margin-top:20px">
+					Keywords:
+					<% for(var i = 0; i < relevant_data.keywords.length; i++){%>
+					<% if(relevant_data.keywords[i].sentiment.score > 0){%>
+					<span class="news_sentiment_area label label-success" 
+					title="Sentiment: <%=relevant_data.keywords[i].sentiment.score%>
+					Relevance: <%=relevant_data.keywords[i].sentiment.score%>"style="margin-left:8px">
+					<%=relevant_data.keywords[i].text%>
+					<% }else if(relevant_data.keywords[i].sentiment.score <0){%>
+					<span class="news_sentiment_area label label-danger" 
+					title="Sentiment: <%=relevant_data.keywords[i].sentiment.score%>
+					Relevance: <%=relevant_data.keywords[i].sentiment.score%>"style="margin-left:8px">
+					<%=relevant_data.keywords[i].text%>
+					<%} else {%>
+					<span class="news_sentiment_area label label-info" 
+					title="Sentiment: <%=relevant_data.keywords[i].sentiment.score%>
+					Relevance: <%=relevant_data.keywords[i].sentiment.score%>" style="margin-left:8px">
+					<%=relevant_data.keywords[i].text%>
+					<% } %>
+				</span>
+				<% } %>
+			</div>
+			<ul id="secondary_menu_area" class="col-sm-8 nav nav-tabs">
+				<li role="presentation" id="mc_button1" class="active">
+					<a href="/articles?id=<%=relevant_data.id%>">entities</a>
+				</li>
+				<li role="presentation" id="mc_button2"><a href="">concepts</a></li>
+			</ul>
+		</div>
+		<div id="rel_area" class="col-sm-8 custom-main-panel">
+			<% for(var j = 0; j < relevant_data.entities.length; j++){%>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h5>
+						<span class="panel-title" style="margin-right:15px">
+							<%= relevant_data.entities[j].text%>
+						</span>
+						<span class="label label-info" style="margin-left:5px;font-size:14px">type: <%= relevant_data.entities[j].type%></span>
+						<span class="label label-info" style="margin-left:5px;font-size:14px">relevance: <%= relevant_data.entities[j].relevance %></span>
+						<% if(relevant_data.entities[j].sentiment.type==='neutral'){%>
+						<span class="label label-info" style="margin-left:5px;font-size:14px">sentiment: neutral</span>
+						<%} else {%>
+						<% if(relevant_data.entities[j].sentiment.score > 0){%>
+						<span class="label label-success" style="margin-left:5px;font-size:14px">sentiment: <%= relevant_data.entities[j].sentiment.score %></span>
+						<% }else if(relevant_data.entities[j].sentiment.score < 0){%>
+						<span class="label label-danger" style="margin-left:5px;font-size:14px">sentiment: <%= relevant_data.entities[j].sentiment.score %></span>
+						<%} else {%>
+						<span class="label label-info" style="margin-left:5px;font-size:14px">sentiment: <%= relevant_data.entities[j].sentiment.score %></span>
+						<% } %>
+						<%}%>
+						<span class="label label-info" style="margin-left:5px;font-size:14px">count: <%= relevant_data.entities[j].count %></span>
+					</h5>
+				</div>
+			</div>
+			<% } %>
+		</div>
+	</div>
+</div>

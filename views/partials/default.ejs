@@ -15,3 +15,28 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <script src="/javascripts/main-content.js"></script>
 <script src="/javascripts/trending_scripts.js"></script>
+<script>
+$(document).ready(function(){
+	$('#imp_se').on('click',function(event){
+		event.preventDefault();
+		$('#main_population').empty();
+		getSearchResults($('#imp_se div input').val());
+	});
+});
+
+function getSearchResults(query_string){
+	console.log(query_string.trim());
+	$.ajax({
+		type:'GET',
+		url: 'http://127.0.0.1:3000/search',
+		crossDomain: true,
+		data : {
+			look : query_string
+		},
+		success: function(data){
+			console.log(data);
+			// buildConcepts(data);
+		},
+	})
+}
+</script>
