@@ -19,6 +19,7 @@
     "google-finance" : "latest",
     "finance-scraper-js" : "latest",
     "async" : "latest",
-    "colors" : "latest"
+    "colors" : "latest",
+    "promise" : "latest"
   }
 }
