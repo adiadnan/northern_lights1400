@@ -6,6 +6,7 @@ var googleFinance = require('google-finance');
 const company = require('./models/companySchema').company;
 const article = require('./models/article').article;
 const mongoose = require('mongoose');
+const country_rating = require('./country_rating');
 
 function macd(lines, sentiment){
 
@@ -134,7 +135,6 @@ router.get('/', function(req, res, next) {
 		.find({
 			details: req.query.sym 
 		})
-		.select('issuer details mentioned_by daily_rating company_sentiment company_PEG related_stock company_financial_rating')
 		.exec(function(err,companies){
 			if(err){
 				res.render('companies', {});
@@ -162,6 +162,9 @@ router.get('/', function(req, res, next) {
 					return console.log(err);
 				}
 				console.log(articles.length);
+				articles.sort(function(a,b){
+					return new Date(b.date).getTime() - new Date(a.date).getTime();
+				});
 				obj.articles = articles;
 				console.log(companies[0].company_sentiment);
 				googleFinance.historical({
@@ -177,7 +180,9 @@ router.get('/', function(req, res, next) {
 						console.log('google-finance module not working again');
 					}
 					obj.latest_prediction = macd(quotes, obj.company_sentiment);
-					console.log(obj.latest_prediction);
+					obj.ovr = country_rating.getRating();
+					obj.u = calculateIncreaseDecrease(latest_prediction[1],latest_prediction[0])
+					console.log(obj.u);
 					res.render('companies', obj);
 				});			
 			});
@@ -190,7 +195,6 @@ obj.calculateIncreaseDecrease = calculateIncreaseDecrease;
 console.log(req.query.sym);
 company
 .find({'_id' : req.query.sym})
-.select('issuer details mentioned_by daily_rating company_sentiment company_PEG related_stock company_financial_rating')
 .exec(function(err,companies){
 	if(err){
 		res.render('companies', {});
@@ -217,6 +221,9 @@ company
 			return console.log(err);
 		}
 		console.log(articles.length);
+		articles.sort(function(a,b){
+			return new Date(b.date).getTime() - new Date(a.date).getTime();
+		});
 		obj.articles = articles;
 		console.log(companies[0].company_sentiment);
 		googleFinance.historical({
@@ -233,7 +240,9 @@ company
 			}
 			obj.latest_prediction = macd(quotes, obj.company_sentiment);
 				// obj.conclusion = 
-				console.log(obj.latest_prediction);
+				obj.ovr = country_rating.getRating();
+				obj.u = calculateIncreaseDecrease(obj.latest_prediction[1],obj.latest_prediction[0])
+				console.log(obj.u);
 				res.render('companies', obj);
 			});			
 	});

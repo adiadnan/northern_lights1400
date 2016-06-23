@@ -19,6 +19,7 @@ var companySchema = new Schema({
 	related_stock : {type : Number, default : 0},/* CC */
 	company_rating : {type : Number, default : 0},/* CC */
 	daily_rating : {type : Number, default : 0},/* CC */
+	latest_price : {type: Number, default: 0},
 	related_to : [String],/* checked *//* CC */
 	mentioned_by : [String]/* checked *//* CC */
 },{

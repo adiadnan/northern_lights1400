@@ -117,7 +117,29 @@
 					</span>
 				</div>
 				<% }%>
-				<% var u = calculateIncreaseDecrease(latest_prediction[1],latest_prediction[0]) %>
+				<% var imp = (20*ovr+25*company_financial_rating+25*company_PEG+35*related_stock+50*company_sentiment)/155%>
+				<% if(imp < 0) { %>
+				<div id="wid_limit" class="alert alert-danger" role="alert">
+					Company rating
+					<span style="float:right;margin-right:8px">
+						<%=imp.toPrecision(5)%>
+					</span>
+				</div>
+				<% } else if(imp > 0){ %>
+				<div id="wid_limit" class="alert alert-success" role="alert">
+					Company rating
+					<span style="float:right">
+						<%=imp.toPrecision(5)%>
+					</span>
+				</div>
+				<% } else { %>
+				<div id="wid_limit" class="alert alert-info" role="alert">
+					Company rating
+					<span style="float:right">
+						<%=imp.toPrecision(5)%>
+					</span>
+				</div>
+				<% }%>
 				<% if(daily_rating < 0) { %>
 				<div id="wid_limit" class="alert alert-danger" role="alert">
 					Daily rating :
@@ -144,10 +166,10 @@
 						<% if(!u) {%>
 						<b>no relevant data</b>
 						<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true">
-							<% } else if(u > 150){%>
+							<% } else if(u > 90){%>
 							<b>strong investment</b>
 							<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
-							<% } else if(u < 150 && u > 0){%>
+							<% } else if(u < 90 && u > 0){%>
 							<b>invest on your own risk</b>
 							<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
 							<% } else if(u < 0) {%>

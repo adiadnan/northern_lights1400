@@ -18,7 +18,7 @@ const colors = require('colors');
 
 const alchemy = new AlchemyAPI();
 
-var COMPANY_LIST = ['NFLX'];
+var COMPANY_LIST = ['HGSH'];
 
 colors.setTheme({
 	silly: 'rainbow',
@@ -40,10 +40,18 @@ var secondExecutionInterval = 10000;
 // setInterval(function(){
 // 	console.log((times * 5) + ' minutes passed.');
 // 	times++;
+// company.find({}, function(err,docs){
+// 	if(err){
+// 		return console.log(err);
+// 	}
+// 	docs.forEach(function(item, index){
+// 		item.related_to.forEach(getCompanyNews);
+// 	});
+// });
 	// main(COMPANY_LIST);
 	// setTimeout(function(){
 	// 	log('Secondary function called.');
-		// correct_database();
+		correct_database();
 		// add_stock_financial_data(companies);
 	// }, secondExecutionInterval);
 // }, executionInterval);
@@ -58,7 +66,7 @@ function getCompanyNews(companySymbol, index){
 	google_finance.companyNews(obj,
 		function(err, news){
 			if(err){
-				console.log(('Problem with the company: ' + companySymbol).error);
+				console.log(('ERROR: Problem with the company: ' + companySymbol).error);
 				return console.log(err);
 			}
 			var length = news.length;
@@ -200,7 +208,7 @@ function getCompanyRating(news, index){
 										return console.log(err);
 									}
 									console.log('Company with symbol ' + main_company_symbol + ' is :');
-									console.log(cm);
+									// console.log(cm);
 									// update_company_list([main_company_symbol]);
 									company_handler(main_company_symbol, news.link, result_object, cm);
 								})
@@ -235,7 +243,7 @@ function company_handler(main_company_symbol, link, result_object, cm){
 			oop = buildCompanyDetailsObject(oop);
 		}
 		var temp = inter_companyRelations(main_company_symbol, result_object.entities, link);
-		update_company_list(temp);
+		// update_company_list(temp);
 		new_company.company_financial_rating = 0;
 		new_company.company_PEG = 0;
 		if(report){
@@ -251,7 +259,7 @@ function company_handler(main_company_symbol, link, result_object, cm){
 			}
 		}
 		var val = parseFloat(result_object.sentiment.score);
-		console.log('VAal ' + val);
+		// console.log('VAal ' + val);
 		new_company.company_sentiment = []
 		new_company.company_sentiment.push(val);
 		var new_val = 0;
@@ -588,7 +596,7 @@ function macd(lines, sentiment){
 		// console.log('ema macd : ' + ema_macd);
 		// console.log('histogram : ' + macd_histogram);
 	}
-	console.log('RESULT : ' + result);
+	// console.log('RESULT : ' + result);
 	return result
 
 }
@@ -610,7 +618,7 @@ function update_company_list(related_to){
 			}
 		}
 		if(found === false){
-			console.log(COMPANY_LIST);
+			// console.log(COMPANY_LIST);
 			result.push(related_to[i]);
 		}
 	}
