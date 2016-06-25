@@ -40,18 +40,18 @@ var secondExecutionInterval = 10000;
 // setInterval(function(){
 // 	console.log((times * 5) + ' minutes passed.');
 // 	times++;
-company.find({}, function(err,docs){
-	if(err){
-		return console.log(err);
-	}
-	docs.forEach(function(item, index){
-		item.related_to.forEach(getCompanyNews);
-	});
-});
+// company.find({}, function(err,docs){
+// 	if(err){
+// 		return console.log(err);
+// 	}
+// 	docs.forEach(function(item, index){
+// 		item.related_to.forEach(getCompanyNews);
+// 	});
+// });
 	// main(COMPANY_LIST);
 	// setTimeout(function(){
 	// 	log('Secondary function called.');
-		correct_database();
+	correct_database();
 		// add_stock_financial_data(companies);
 	// }, secondExecutionInterval);
 // }, executionInterval);
@@ -213,7 +213,7 @@ function getCompanyRating(news, index){
 									company_handler(main_company_symbol, news.link, result_object, cm);
 								})
 
-});
+							});
 });
 });
 // }
@@ -432,19 +432,54 @@ function correct_database(){
 				console.log(err);
 				return console.log('Problem correcting the database.'.error);
 			}
-			async.parallel([
-				function(){
-					update_related_stock_entries(companies);
-				},
-				function(){
-					// add_stock_financial_data(companies);
-				}],
-				function(err){
-					if(err){
-						console.log(err);
-						return;
-					}
-				});
+			companies.forEach(function(item,index){
+				var option = {format: 'aarray',	toNumber: true};
+				yahoo.getKeyStatistics(item.symbol, option, 
+					function (error, report) {
+						if (error) {
+							console.log(error); 
+						}
+						var _t = {};
+						_t.company_financial_rating = 0;
+						_t.company_PEG = 0;
+						if(report){
+							if(report[0]['Qtrly Earnings Growth (yoy)'] === 'N/A'){
+								_t.company_financial_rating = 0;
+							} else {
+								_t.company_financial_rating = report[0]['Qtrly Earnings Growth (yoy)'];
+							}
+							if(report[0]['PEG Ratio (5 yr expected)'] === 'N/A'){
+								_t.company_PEG = 0;
+							} else {
+								_t.company_PEG = report[0]['PEG Ratio (5 yr expected)'];
+							}
+							company.update({
+								issuer: item.issuer
+							},{
+								company_financial_rating: _t.company_financial_rating,
+								company_PEG: _t.company_PEG
+							},null,function(err,num){
+								if(err){
+									console.log(err);
+								}
+								console.log(num);
+							});
+						}
+					});
+			});
+			// async.parallel([
+			// 	function(){
+			// 		update_related_stock_entries(companies);
+			// 	},
+			// 	function(){
+			// 		// add_stock_financial_data(companies);
+			// 	}],
+			// 	function(err){
+			// 		if(err){
+			// 			console.log(err);
+			// 			return;
+			// 		}
+			// 	});
 
 		});
 }

@@ -5,30 +5,165 @@
 	<% include partials/company_styles.ejs %>
 	<% include partials/company_scripts.ejs %>
 	<script>
+	var month = new Array();
+	month[0] = "January";
+	month[1] = "February";
+	month[2] = "March";
+	month[3] = "April";
+	month[4] = "May";
+	month[5] = "June";
+	month[6] = "July";
+	month[7] = "August";
+	month[8] = "September";
+	month[9] = "October";
+	month[10] = "November";
+	month[11] = "December";
+	function getLastMonth(){
+		var d = new Date();
+		var m = d.getMonth();
+		d.setMonth(d.getMonth() - 1);
+		if (d.getMonth() == m) d.setDate(0);
+		d.setHours(0,0,0)
+
+		console.log(d.getTime());
+		return d;
+	}
+
 	var myChart = {
-		"type":"line",
-		"scaleX":{
-			"min-value":16951,
-			"step":4,
-			"max-labels":9
+		"type":"stock",
+		"title":{
+			"text":"Candlestick chart for <%=issuer%>" 
 		},
-		"series":[
-		{
-			"values":[32,5,6,97,8,500
-			<% for(var i = 0; i < quotes.length; i++){%>
-				<%=quotes[i].close%>
-				<% } %>],
-				"text":  "<%=issuer%>"
-			}
-			]
-		};
-		</script>
-	</head>
-	<body>
+		"utc":true,
+  "timezone":-5, //EST time
+  "scale-x":{
+  	"min-value": new Date('2013').getTime(),
+  	"max-value": new Date().getTime(),
+  	"step":"day",
+  	"transform":{
+  		"type":"date",
+  		"all":"%m/%d/%y"
+  	},
+  	"item":{
+  		"font-size":10
+  	},
+  	"max-items":10,
+  	"zooming":true,
+  	// "zoom-to-values":[getLastMonth().getTime(),new Date().getTime()]
+  },
+  "scale-y":{
+  	<% var min = quotes[0].close %>
+  	<% for(var i = quotes.length - 32; i < quotes.length; i++){%>
+  		<% if(min > quotes[i].close) {%>
+  			<% min = quotes[i].close%>
+  			<% } %>
+  			<% } %>
+  	"min-value":<%= min%>,
+  	"format":"$%v",
+  	"item":{
+  		"font-size":10
+  	},
+  	"guide":{
+  		"line-style":"dotted"
+  	}
+  },
+  "scroll-x":{
 
-		<% include partials/page/header.ejs %>
-		<% include partials/page/main_company_content.ejs %>
+  },
+  "crosshair-x":{
+  	"plot-label":{
+  		"text":"Open: $%open<br>High: $%high<br>Low: $%low<br>Close: $%close",
+  		"decimals":2,
+  		"multiple":true,
+  		"placement":"node-top",
+  		"offset-y":-7,
+  	},
+  	"scale-label":{
+  		"text":"%v",
+  		"transform":{
+  			"type":"date",
+  			"all":"%D, %m/%d/%y"
+  		}
+  	}
+  },
+  "crosshair-y":{
+  	"type":"multiple",
+  	"scale-label":{
+  		"visible":false
+  	}
+  },
+  "plot":{
+  	"aspect":"candlestick",
+  	"tooltip":{
+  		"visible":false
+  	},
+  	"trend-up":{
+  		"background-color":"#00ccff",
+  		"line-color":"#333333",
+  		"border-color":"#333333"
+  	},
+  	"trend-down":{
+  		"background-color":"#ff6699",
+  		"line-color":"#333333",
+  		"border-color":"#333333"
+  	}
+  },
+  "series":[
+  {
+  	"values":[
+  	<% for(var i = 0; i < quotes.length; i++){%>
+  		[<%= new Date(quotes[i].date).getTime() %>, [<%=quotes[i].open%>,<%=quotes[i].high%>,<%=quotes[i].low%>,<%=quotes[i].close%>]]
+  		<% if(i != quotes.length - 1) {%>
+  			,
+  			<% } %>
+  			<% } %>
+  			]
+  		}
+  		]
+  	}
 
-	</nav>
+
+// 	"type":"line",
+// 	"scale-x":{
+// 			// "min-value":getLastMonth(),
+// 			"step":"day",
+// 			"max-labels":9,
+// 			// "format":month[getLastMonth().getMonth()] + getLastMonth().getDate()
+// 			"transform": {
+// 				"type":"date",
+// 				"all":"%m/%d"
+// 			}
+// 		},
+// 		"scale-y": {
+// 			"min-value":
+// 			<% var min = quotes[0].close %>
+// 			<% for(var i = 0; i < quotes.length; i++){%>
+// 				<% if(min > quotes[i].close) {%>
+// 					<% min = quotes[i].close%>
+// 					<% } %>
+// 					<% } %>
+// 					<%= min%>
+// 				},
+// 				"series":[
+// 				{
+// 					"values":[
+// 					<% for(var i = 0; i < quotes.length; i++){%>
+// 						<%=quotes[i].close%>
+// 						<% if(i != quotes.length - 1) {%>
+// 							,
+// 							<% } %>
+// 							<% } %>],
+// 							"text":  "<%=issuer%>"
+// 						}
+// 						]
+// 					};
+</script>
+</head>
+<body>
+
+	<% include partials/page/header.ejs %>
+	<% include partials/page/main_company_content.ejs %>
+
+</nav>
 </body>
 </html>

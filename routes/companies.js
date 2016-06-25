@@ -33,12 +33,12 @@ function macd(lines, sentiment){
 		var macd = ema_short - ema_long;
 		ema_macd = alpha_macd * macd + (1 - alpha_macd) * ema_macd;
 		var macd_histogram = macd - ema_macd;
-		console.log('before : ' + macd_histogram);
+		// console.log('before : ' + macd_histogram);
 		if(sentiment && sentiment != 0){
 			macd_histogram = (macd_histogram * 40 + 60 * sentiment)/100;
 			// console.log(sentiment);
 		}
-		console.log('after : ' + macd_histogram);
+		// console.log('after : ' + macd_histogram);
 		if(lines.length - 2 >= 0){
 			if(lines.length - 2 == i){
 				result.push(macd_histogram);
@@ -87,6 +87,17 @@ function calculateIncreaseDecrease(ne, old){
 	return diff;
 }
 
+function getLastMonth(){
+	var d = new Date();
+	var m = d.getMonth();
+	d.setMonth(d.getMonth() - 1);
+	if (d.getMonth() == m) d.setDate(0);
+	d.setHours(0,0,0)
+
+	console.log(d.getTime());
+	return d;
+}
+
 
 var company_error_message = 'Problem finding the company!'
 /* GET home page. */
@@ -99,7 +110,6 @@ router.use(function(req, res, next) {
 
 router.get('/related', function(req, res, next) {
 	var issuer = req.query.issuer;
-	// return res.send({pula: 'o sugi!'});
 	if(issuer){
 		company.findOne({
 			issuer : issuer
@@ -154,6 +164,7 @@ router.get('/', function(req, res, next) {
 			obj.company_PEG = companies[0].company_PEG;
 			obj.related_stock = companies[0].related_stock;
 			obj.company_financial_rating = companies[0].company_financial_rating;
+			console.log(companies);
 			obj.latest_var = companies[0].latest_var;
 			article
 			.find({ link : { $in : companies[0].mentioned_by}})
@@ -172,7 +183,7 @@ router.get('/', function(req, res, next) {
 				console.log(companies[0].company_sentiment);
 				googleFinance.historical({
 					symbol: companies[0].details[0],
-					from: '2016-01-25'
+					from: '2013-01-25'
 				}, function (err, quotes) {
 					if(err){
 						console.log('Problem fetching historical data.'.error);
@@ -185,7 +196,8 @@ router.get('/', function(req, res, next) {
 					obj.latest_prediction = macd(quotes, obj.company_sentiment);
 					obj.ovr = country_rating.getRating();
 					obj.u = calculateIncreaseDecrease(latest_prediction[1],latest_prediction[0])
-					console.log(obj.u);
+					obj.getLastMonth = getLastMonth;
+					console.log('financial rating' + obj.company_financial_rating);
 					res.render('companies', obj);
 				});			
 			});
@@ -214,6 +226,7 @@ company
 	obj.company_PEG = companies[0].company_PEG;
 	obj.related_stock = companies[0].related_stock;
 	obj.company_financial_rating = companies[0].company_financial_rating;
+	console.log('fr : ' + companies[0].company_financial_rating);
 	obj.latest_var = companies[0].latest_var;
 	article
 	.find({ link : { $in : companies[0].mentioned_by}})
@@ -229,10 +242,10 @@ company
 			return new Date(b.date).getTime() - new Date(a.date).getTime();
 		});
 		obj.articles = articles;
-		console.log(companies[0].company_sentiment);
+		console.log(companies);
 		googleFinance.historical({
 			symbol: companies[0].details[0],
-			from: '2016-01-25'
+			from: '2013-01-25'
 		}, function (err, quotes) {
 			if(err){
 				console.log('Problem fetching historical data.'.error);
@@ -242,13 +255,14 @@ company
 			if(quotes.length === 0){
 				console.log('google-finance module not working again');
 			}
-			obj.quotes = quotes.slice(0,31);
+			obj.quotes = quotes;
 			// console.log(quotes.length);
 			obj.latest_prediction = macd(quotes, obj.company_sentiment);
 				// obj.conclusion = 
 				obj.ovr = country_rating.getRating();
 				obj.u = calculateIncreaseDecrease(obj.latest_prediction[1],obj.latest_prediction[0])
-				console.log(obj.u);
+				obj.getLastMonth = getLastMonth;
+				console.log('financial rating' + obj.company_financial_rating);
 				res.render('companies', obj);
 			});			
 	});

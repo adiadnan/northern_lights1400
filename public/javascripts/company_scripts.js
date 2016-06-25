@@ -35,6 +35,7 @@ $('#mc_button3').bind('click',function(event){
 		$('#mc_button1').attr('class', '');
 		$('#mc_button2').attr('class', '');
 		$('#mc_button4').attr('class', '');
+		$('#rel_area').empty();
 	}
 });
 $('#mc_button4').bind('click',function(event){
@@ -43,8 +44,9 @@ $('#mc_button4').bind('click',function(event){
 		$(this).attr('class', 'active');
 		$('#mc_button1').attr('class', '');
 		$('#mc_button2').attr('class', '');
+		$('#mc_button3').attr('class', '');
 		$('#rel_area').empty();
-		$('#rel_area').append('<div id="steps" style="margin-top:20px"></div>');
+		$('#rel_area').append('<div id="steps" style="margin-bottom:50px"></div>');
 		render();
 	}
 });
