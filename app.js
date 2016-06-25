@@ -14,6 +14,13 @@ var companies = require('./routes/companies');
 var articles = require('./routes/articles');
 var search = require('./routes/search');
 
+const request = require('request');
+const cheerio = require('cheerio');
+
+const company = require('./routes/models/companySchema').company;
+
+const yahoo_scraping_activated = false;
+
 
 var app = express();
 
@@ -37,8 +44,49 @@ app.use('/trending', trending);
 app.use('/companies', companies);
 app.use('/articles', articles);
 app.use('/search', search);
-
-
+var s = 0;
+if(yahoo_scraping_activated){
+  setInterval(function(){
+    company.find({},
+      function(err, docs){
+        docs.forEach(function(item, index){
+          request('http://finance.yahoo.com/q?s=' + item.details[0], 
+            function(err, response, html){
+              if(err){
+                return console.log(err);
+              }
+              var $ = cheerio.load(html);
+              $('span.time_rtq_content').filter(function(){
+                var data = $(this).children();
+                var str = data['1'].children[0].data;
+              // console.log(data['1']);
+              str = str.replace(/\(|\)/g,'')
+              if($(this).hasClass('down_r') === true){
+                str = '-' + str;
+              } else if($(this).hasClass('down_r') === false){
+                str = '+' + str;
+              }
+              console.log(s);
+              console.log(str);
+              company.update({
+                issuer: item.issuer
+              },{
+                $set: {
+                  latest_var: str
+                }
+              },null, function(err, num){
+                if(err){
+                  return console.log(err);
+                }
+                console.log(num);
+              });
+              s++;
+            });
+            })
+});
+});
+}, 3000);
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

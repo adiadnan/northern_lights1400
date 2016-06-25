@@ -17,6 +17,19 @@
 								<% } %>]
 							</small>
 						</span>
+						<span id="com_var">
+							<small>
+								<% if(latest_var.charAt(0) === '+') {%>
+								<span style="color:green">
+									(<%=latest_var%>)
+								</span>
+								<% } else if(latest_var.charAt(0) === '-'){%>
+								<span style="color:red">
+									(<%=latest_var%>)
+								</span>
+								<% } %>
+							</small>
+						</span>
 					</h1>
 				</div>
 
@@ -148,13 +161,13 @@
 					<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true">
 						<% } else if(u > 150){%>
 						<b>strong investment</b>
-						<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 						<% } else if(u < 150 && u > 0){%>
 						<b>invest on your own risk</b>
-						<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 						<% } else if(u < 0) {%>
 						<b>don't invest</b>
-						<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 						<% } %>
 						<span style="float:right;margin-right:8px">
 							<%=daily_rating.toPrecision(5)%>
@@ -168,13 +181,13 @@
 						<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true">
 							<% } else if(u > 90){%>
 							<b>strong investment</b>
-							<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
+							<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 							<% } else if(u < 90 && u > 0){%>
 							<b>invest on your own risk</b>
-							<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
+							<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 							<% } else if(u < 0) {%>
 							<b>don't invest</b>
-							<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true"></span>
+							<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 							<% } %>
 							<span style="float:right;margin-right:8px">
 								<%=daily_rating.toPrecision(5)%>
@@ -185,11 +198,11 @@
 						<div id="wid_limit" class="alert alert-info" role="alert">
 							Daily rating 
 							<% if(latest_prediction[1] > latest_prediction[0]){%> 					
-							<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true"></span>
+							<span class="glyphicon glyphicon-arrow-up" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 							<% } else if(latest_prediction[1] < latest_prediction[0]){%>
-							<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true"></span>
+							<span class="glyphicon glyphicon-arrow-down" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 							<% } else {%>
-							<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true"></span>
+							<span class="glyphicon glyphicon-arrow-right" style="float:right" aria-hidden="true" title="variation:<%=u.toPrecision(4)%>%"></span>
 							<% } %>
 							<span style="float:right">
 								<%=daily_rating.toPrecision(5)%>
@@ -203,6 +216,7 @@
 						</li>
 						<li role="presentation" id="mc_button2"><a href="">related to</a></li>
 						<li role="presentation" id="mc_button3"><a href="">financial data</a></li>
+						<li role="presentation" id="mc_button4"><a href="">charts</a></li>
 					</ul>
 				</div>
 				<div id="rel_area" class="col-sm-8 custom-main-panel">

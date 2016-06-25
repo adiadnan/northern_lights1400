@@ -40,14 +40,14 @@ var secondExecutionInterval = 10000;
 // setInterval(function(){
 // 	console.log((times * 5) + ' minutes passed.');
 // 	times++;
-// company.find({}, function(err,docs){
-// 	if(err){
-// 		return console.log(err);
-// 	}
-// 	docs.forEach(function(item, index){
-// 		item.related_to.forEach(getCompanyNews);
-// 	});
-// });
+company.find({}, function(err,docs){
+	if(err){
+		return console.log(err);
+	}
+	docs.forEach(function(item, index){
+		item.related_to.forEach(getCompanyNews);
+	});
+});
 	// main(COMPANY_LIST);
 	// setTimeout(function(){
 	// 	log('Secondary function called.');

@@ -19,6 +19,7 @@ function register(){
 	}).done(function(response){
 		console.log(response);
 			// location.reload();
+			window.location.replace('http://localhost:3000/login');
 		}).fail(function(a,b,c){
 			if(a.status == 500){
 				alert(a.responseText);

@@ -94,4 +94,10 @@ body{
 #tabs{
     text-align: center;
 }
+.app_name{
+    text-align: center;
+}
+#app_ti_name{
+    font-size:15px;
+}
 

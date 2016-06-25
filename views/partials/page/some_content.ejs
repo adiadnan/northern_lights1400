@@ -5,7 +5,7 @@
         <a href="#">Hot</a>
       </li>
       <li role="presentation" id="button-action2" onclick="changeState(this)"><a href="#">Recommended for you</a></li>
-      <li role="presentation" id="button-action3" onclick="changeState(this)"><a href="#">Tags</a></li>
+      <li role="presentation" id="button-action3" onclick="changeState(this)"><a href="#">Portofolio</a></li>
     </ul>
     <div class="col-sm-8 custom-main-panel">
       <%if(relevant_data.length === 0){%>
@@ -20,6 +20,17 @@
         <span class="left_wall">
           <a href="/companies?sym=<%=relevant_data[i].id%>">
             <%= relevant_data[i].issuer %>
+            (
+            <% if(relevant_data[i].latest_var.charAt(0) === '-'){%>
+            <span style="color:red">
+              <%= relevant_data[i].latest_var %>
+            </span>
+            <% } else if(relevant_data[i].latest_var.charAt(0) !== '-'){%>
+            <span style="color:green">
+              <%= relevant_data[i].latest_var %>
+            </span>
+            <% } %>
+            )
           </a>
         </span>
         <div class="right_wall">

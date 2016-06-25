@@ -7,24 +7,47 @@ $(document).ready(function(){
 	// 		$('#mc_button3').attr('class', '');
 	// 	}
 	// });
-	$('#mc_button2').bind('click',function(event){
-		event.preventDefault();
-		if($(this).attr('class') !== 'active'){
-			$(this).attr('class', 'active');
-			$('#mc_button1').attr('class', '');
-			$('#mc_button3').attr('class', '');
-			$('#rel_area').empty();
-			getRelatedTo($('#com_issuer').text());
-		}
+function render(){
+	zingchart.render({
+		id: "steps",
+		output: "svg",
+		width: 600,
+		height: 400,
+		data: myChart
+
 	});
-	$('#mc_button3').bind('click',function(event){
-		event.preventDefault();
-		if($(this).attr('class') !== 'active'){
-			$(this).attr('class', 'active');
-			$('#mc_button1').attr('class', '');
-			$('#mc_button2').attr('class', '');
-		}
-	});
+}
+$('#mc_button2').bind('click',function(event){
+	event.preventDefault();
+	if($(this).attr('class') !== 'active'){
+		$(this).attr('class', 'active');
+		$('#mc_button1').attr('class', '');
+		$('#mc_button3').attr('class', '');
+		$('#mc_button4').attr('class', '');
+		$('#rel_area').empty();
+		getRelatedTo($('#com_issuer').text());
+	}
+});
+$('#mc_button3').bind('click',function(event){
+	event.preventDefault();
+	if($(this).attr('class') !== 'active'){
+		$(this).attr('class', 'active');
+		$('#mc_button1').attr('class', '');
+		$('#mc_button2').attr('class', '');
+		$('#mc_button4').attr('class', '');
+	}
+});
+$('#mc_button4').bind('click',function(event){
+	event.preventDefault();
+	if($(this).attr('class') !== 'active'){
+		$(this).attr('class', 'active');
+		$('#mc_button1').attr('class', '');
+		$('#mc_button2').attr('class', '');
+		$('#rel_area').empty();
+		$('#rel_area').append('<div id="steps" style="margin-top:20px"></div>');
+		render();
+	}
+});
 });
 
 function getRelatedTo(query_string){

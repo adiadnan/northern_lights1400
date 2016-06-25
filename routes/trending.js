@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 /* GET home page. */
 router.get('/', function(req, res, next) {
 	company.find({})
-	.select('issuer daily_rating company_sentiment')
 	.sort({daily_rating:-1})
 	.exec(
 		function(err,companies){

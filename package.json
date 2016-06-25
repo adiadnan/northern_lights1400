@@ -20,6 +20,8 @@
     "finance-scraper-js" : "latest",
     "async" : "latest",
     "colors" : "latest",
-    "promise" : "latest"
+    "promise" : "latest",
+    "request" : "latest",
+    "cheerio" : "latest"
   }
 }

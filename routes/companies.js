@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 
 var googleFinance = require('google-finance');
+const request = require('request');
+const cheerio = require('cheerio');
 
 const company = require('./models/companySchema').company;
 const article = require('./models/article').article;
@@ -152,6 +154,7 @@ router.get('/', function(req, res, next) {
 			obj.company_PEG = companies[0].company_PEG;
 			obj.related_stock = companies[0].related_stock;
 			obj.company_financial_rating = companies[0].company_financial_rating;
+			obj.latest_var = companies[0].latest_var;
 			article
 			.find({ link : { $in : companies[0].mentioned_by}})
 			.select('sentiment description date link title')
@@ -211,6 +214,7 @@ company
 	obj.company_PEG = companies[0].company_PEG;
 	obj.related_stock = companies[0].related_stock;
 	obj.company_financial_rating = companies[0].company_financial_rating;
+	obj.latest_var = companies[0].latest_var;
 	article
 	.find({ link : { $in : companies[0].mentioned_by}})
 	.select('sentiment description date link title')
@@ -238,6 +242,8 @@ company
 			if(quotes.length === 0){
 				console.log('google-finance module not working again');
 			}
+			obj.quotes = quotes.slice(0,31);
+			// console.log(quotes.length);
 			obj.latest_prediction = macd(quotes, obj.company_sentiment);
 				// obj.conclusion = 
 				obj.ovr = country_rating.getRating();

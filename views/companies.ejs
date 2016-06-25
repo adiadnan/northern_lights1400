@@ -4,12 +4,31 @@
 	<% include partials/default.ejs %>
 	<% include partials/company_styles.ejs %>
 	<% include partials/company_scripts.ejs %>
-</head>
-<body>
-	
-<% include partials/page/header.ejs %>
-<% include partials/page/main_company_content.ejs %>
+	<script>
+	var myChart = {
+		"type":"line",
+		"scaleX":{
+			"min-value":16951,
+			"step":4,
+			"max-labels":9
+		},
+		"series":[
+		{
+			"values":[32,5,6,97,8,500
+			<% for(var i = 0; i < quotes.length; i++){%>
+				<%=quotes[i].close%>
+				<% } %>],
+				"text":  "<%=issuer%>"
+			}
+			]
+		};
+		</script>
+	</head>
+	<body>
 
-</nav>
+		<% include partials/page/header.ejs %>
+		<% include partials/page/main_company_content.ejs %>
+
+	</nav>
 </body>
 </html>

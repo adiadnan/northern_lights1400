@@ -20,7 +20,8 @@ var companySchema = new Schema({
 	company_rating : {type : Number, default : 0},/* CC */
 	daily_rating : {type : Number, default : 0},/* CC */
 	latest_price : {type: Number, default: 0},
-	related_to : [String],/* checked *//* CC */
+	latest_var: {type: String, default: ''},
+	related_to: [String],/* checked *//* CC */
 	mentioned_by : [String]/* checked *//* CC */
 },{
 	collection : 'company_collection'

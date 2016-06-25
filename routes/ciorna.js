@@ -58,23 +58,24 @@
 
 
 // }
-const mongojs = require('./scripts/mongojs');
+// const mongojs = require('./scripts/mongojs');
 
-const company = require('./models/companySchema').company;
-const mongoose = require('mongoose');
+// const company = require('./models/companySchema').company;
+// const mongoose = require('mongoose');
 
-var related_to = ['AAPL','MSFT'];
+// var related_to = ['AAPL','MSFT'];
 
-company.find({
-	details : {
-		$in : related_to
-	}
-}, function(err, docs){
-	if(err){
-		return console.log(err);
-	}
-	if(!docs.length){
-		return console.log('Nothing found.');
-	}
-	console.log(docs);
-})
+// company.find({
+// 	details : {
+// 		$in : related_to
+// 	}
+// }, function(err, docs){
+// 	if(err){
+// 		return console.log(err);
+// 	}
+// 	if(!docs.length){
+// 		return console.log('Nothing found.');
+// 	}
+// 	console.log(docs);
+// })
+// Submit on clicking the 'submit' button
