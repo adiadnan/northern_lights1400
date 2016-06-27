@@ -1,17 +1,18 @@
-// var intraday = require('intraday');
+// // var intraday = require('intraday');
 // var googleFinance = require('google-finance');
 // var symbol = 'GOOG';
 
 // googleFinance.historical({
 // 	symbol: symbol,
-// 	from: '2016-01-25'
+// 	from: '2016-06-01'
 // }, function (err, quotes) {
 // 	if(err){
 // 		console.log('Problem fetching historical data.'.error);
 // 		console.log(err);
 // 		return;
 // 	}
-// 	macd(quotes, 0.9);
+// 	console.log(quotes[quotes.length - 1]);
+// 	// macd(quotes, 0.9);
 // });
 
 // function macd(lines, sentiment){
@@ -79,3 +80,13 @@
 // 	console.log(docs);
 // })
 // Submit on clicking the 'submit' button
+
+const user = require('./models/userSchema').user;
+const mongojs = require('./scripts/mongojs');
+
+user.update({},{money_left:100000},{multi:true},function(err,num){
+	if(err){
+		return console.log(err);
+	}
+	console.log(num);
+});

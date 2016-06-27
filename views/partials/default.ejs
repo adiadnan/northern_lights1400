@@ -21,7 +21,15 @@ $(document).ready(function(){
 		event.preventDefault();
 		getSearchResults($('#imp_val').val());
 	});
+	if(document.cookie && window.location.href === 'http://localhost:3000/login'){
+		window.location.replace('http://localhost:3000/trending');
+	}
 });
+
+function delete_cookie() {
+	window.location.replace('http://localhost:3000/login');
+	document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
 
 function getSearchResults(query_string){
 	console.log(query_string);
@@ -37,6 +45,9 @@ function getSearchResults(query_string){
 			if(data.empty !== 1){
 				$('#main_population').empty();
 				buildSearch(data);
+			} else {
+				$('.modal-title').val('No search results!');
+				$('#myModal').modal('toggle');
 			}
 			// buildConcepts(data);
 		},

@@ -4,9 +4,13 @@ var router = express.Router();
 var googleFinance = require('google-finance');
 const request = require('request');
 const cheerio = require('cheerio');
+const yahoo = require('finance-scraper-js').yahoo;
 
 const company = require('./models/companySchema').company;
+const user = require('./models/userSchema').user;
 const article = require('./models/article').article;
+const order = require('./models/orderSchema').order;
+const portofolio = require('./models/user_portofolio').portofolio;
 const mongoose = require('mongoose');
 const country_rating = require('./country_rating');
 
@@ -138,6 +142,176 @@ router.get('/related', function(req, res, next) {
 	}
 });
 
+router.post('/investments/platform/buy', function(req, res, next) {
+	var username = req.body.user;
+	var symbol = req.body.symbol;
+	var amount = req.body.amount;
+	user.findOne({
+		username: username
+	},function(err, docs){
+		if(err){
+			return console.log(err);
+		}
+		company.findOne({
+			details: symbol
+		}, function(err,companies){
+			if(err){
+				return console.log(err);
+			}
+			if(docs.money_left - amount * companies.latest_price < 0){
+				return res.send({message: 'Insufficient funds.'});
+			}
+			var obj = {};
+			obj.user = username;
+			obj.symbol = symbol;
+			obj.company_id = companies._id;
+			obj.price = companies.latest_price;
+			obj.amount = amount;
+			obj.date_entered = new Date().getTime();
+			obj.order_type = 'buy';
+			var t = new order(obj);
+			t.save(function(err){
+				if(err){
+					return console.log(err);
+				}
+				console.log('Order saved.');
+			});
+			user.update({
+				username: username
+			},{
+				$inc : {money_left : (-1) * companies.latest_price * amount}
+			},null,function(err, num){
+				if(err){
+					return console.log(err);
+				}
+				console.log(num);
+			})
+			res.send('success');
+		})
+	});
+});
+
+router.post('/investments/platform/sell', function(req, res, next) {
+	var username = req.body.user;
+	var symbol = req.body.symbol;
+	var amount = req.body.amount;
+	user.findOne({
+		username: username
+	},function(err, docs){
+		if(err){
+			return console.log(err);
+		}
+		company.findOne({
+			details: symbol
+		}, function(err,companies){
+			if(err){
+				return console.log(err);
+			}
+			order.find({
+				user: username,
+				symbol: symbol,
+				order_type: 'buy'
+			},function(err,orders){
+				if(err){
+					return console.log(err);
+				}
+
+				order.find({
+					user: username,
+					symbol: symbol,
+					order_type: 'sell'
+				},function(err,_orders){
+					if(err){
+						return console.log(err);
+					}
+					var max = 0;
+					var _max = 0;
+					for(var i = 0; i < orders.length; i++){
+						max += parseFloat(orders[i].amount);
+					}
+					for(var i = 0; i < _orders.length; i++){
+						_max += parseFloat(_orders[i].amount);
+					}
+					console.log(_max);
+					_max += parseFloat(amount);
+					if(max < _max){
+						console.log(max + ' ' + _max);
+						return res.send({message:'Insufficient amount of stocks.'});
+					}
+					var obj = {};
+					console.log(companies);
+					obj.user = username;
+					obj.symbol = symbol;
+					obj.company_id = companies._id;
+					obj.price = companies.latest_price;
+					obj.amount = parseFloat(amount);
+					obj.date_entered = new Date().getTime();
+					obj.order_type = 'sell';
+					var t = new order(obj);
+					t.save(function(err){
+						if(err){
+							return console.log(err);
+						}
+						console.log('Order saved.');
+					});
+					user.update({
+						username: username
+					},{
+						$inc : {money_left : companies.latest_price * amount}
+					},null,function(err, num){
+						if(err){
+							return console.log(err);
+						}
+						console.log(num);
+						res.send({
+							message: 'success',
+							income: amount * companies.latest_price});
+					})
+				});
+})
+
+})
+});
+});
+
+router.get('/investments/platform', function(req, res, next) {
+	var username = req.query.user;
+	user.findOne({
+		username: username
+	},function(err,docs){
+		if(err){
+			return console.log(err);
+		}
+		var response = '';
+		response += '<div class="input-group" style="margin-top:15px">';
+		response += '<span class="input-group-addon" id="basic-addon3">stock amount</span>';
+		response += '<input type="number" min="1" class="form-control" id="basic-url" aria-describedby="basic-addon3" onfocusout="eventOnFocusOut()">';
+		response += '</div>';
+		response += '<label for="basic-url" style="margin-top:15px">Account : <span id="total_money">' + docs.money_left + '</span>$</label></br>';
+		response += '<label for="basic-url" style="margin-top:15px" id="total_value">Total : <span id="stock_subtotal">0</span>$</label></br>';
+		response += '<label for="basic-url" style="margin-top:15px" id="subtotal">Money left : ' + docs.money_left + '</label></br>';
+		response += '<div style="display:inline-block; margin-top:15px">'
+		response += '<button type="button" class="btn btn-primary" style="margin-left:10px" onclick="buyStock()">Buy</button>';
+		response += '<button type="button" class="btn btn-primary" style="margin-left:10px" onclick="sellStock()">Sell</button>';
+		response += '</div>'
+		res.send(response);
+	});
+});
+
+router.get('/finance', function(req, res, next) {
+	var symbol = req.query.symbol;
+	console.log('symbol:' + symbol);
+	var option = {format: 'aarray',	toNumber: true};
+	yahoo.getKeyStatistics(symbol, option, 
+		function (error, report) {
+			if (error) {
+				console.log(symbol);
+				return console.log(error); 
+			}
+			res.send(report);
+		});
+});
+
 router.get('/', function(req, res, next) {
 	if(req.query.byName === 'true'){
 		var obj = {};
@@ -164,8 +338,9 @@ router.get('/', function(req, res, next) {
 			obj.company_PEG = companies[0].company_PEG;
 			obj.related_stock = companies[0].related_stock;
 			obj.company_financial_rating = companies[0].company_financial_rating;
-			console.log(companies);
+			obj.company_rating = companies[0].company_rating;
 			obj.latest_var = companies[0].latest_var;
+			obj.latest_price = companies[0].latest_price;
 			article
 			.find({ link : { $in : companies[0].mentioned_by}})
 			.select('sentiment description date link title')
@@ -201,7 +376,7 @@ router.get('/', function(req, res, next) {
 					res.render('companies', obj);
 				});			
 			});
-		});
+});
 return;
 }
 var obj = {};
@@ -226,8 +401,9 @@ company
 	obj.company_PEG = companies[0].company_PEG;
 	obj.related_stock = companies[0].related_stock;
 	obj.company_financial_rating = companies[0].company_financial_rating;
-	console.log('fr : ' + companies[0].company_financial_rating);
+	obj.company_rating = companies[0].company_rating;
 	obj.latest_var = companies[0].latest_var;
+	obj.latest_price = companies[0].latest_price;
 	article
 	.find({ link : { $in : companies[0].mentioned_by}})
 	.select('sentiment description date link title')

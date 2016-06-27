@@ -347,10 +347,10 @@ function insertCompaniesRelatedToMainCompany(main_company_symbol, link, c){
 	c.forEach(
 		function(item, index){
 			var option = {format: 'aarray',	toNumber: true};
-			yahoo.getKeyStatistics(item.symbol, option, 
+			yahoo.getKeyStatistics(item.details[0], option, 
 				function (error, report) {
 					if (error) {
-						console.log(error); 
+						return console.log(error); 
 					}
 					var _t = {};
 					_t.company_financial_rating = 0;
@@ -432,12 +432,14 @@ function correct_database(){
 				console.log(err);
 				return console.log('Problem correcting the database.'.error);
 			}
+			// console.log(companies);
 			companies.forEach(function(item,index){
 				var option = {format: 'aarray',	toNumber: true};
-				yahoo.getKeyStatistics(item.symbol, option, 
+				yahoo.getKeyStatistics(item.details[0], option, 
 					function (error, report) {
 						if (error) {
-							console.log(error); 
+							console.log(item.symbol);
+							return console.log(error); 
 						}
 						var _t = {};
 						_t.company_financial_rating = 0;
@@ -453,11 +455,16 @@ function correct_database(){
 							} else {
 								_t.company_PEG = report[0]['PEG Ratio (5 yr expected)'];
 							}
+							var imp = 0;
+							if(allNumbersNotZero([country_rating.getRating(),item.company_financial_rating,item.company_PEG,item.related_stock,item.company_sentiment])){
+								imp = (20*country_rating.getRating()+25*item.company_financial_rating+25*item.company_PEG+35*item.related_stock+50*item.company_sentiment)/155;
+							}
 							company.update({
 								issuer: item.issuer
 							},{
 								company_financial_rating: _t.company_financial_rating,
-								company_PEG: _t.company_PEG
+								company_PEG: _t.company_PEG,
+								company_rating: imp
 							},null,function(err,num){
 								if(err){
 									console.log(err);
@@ -466,7 +473,7 @@ function correct_database(){
 							});
 						}
 					});
-			});
+});
 			// async.parallel([
 			// 	function(){
 			// 		update_related_stock_entries(companies);
@@ -481,9 +488,17 @@ function correct_database(){
 			// 		}
 			// 	});
 
-		});
+});
 }
-
+function allNumbersNotZero(list){
+	var all_not_zero = true;
+	for(var i = 0; i < list.length; i++){
+		if(list[i] === 0){
+			return false;
+		}
+	}
+	return all_not_zero;
+}
 
 function update_related_stock_entries(companies){
 	var parsed_companies = [];

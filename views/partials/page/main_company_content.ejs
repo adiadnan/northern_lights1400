@@ -7,7 +7,7 @@
 						<span id="com_issuer">
 							<%=issuer %>
 						</span>
-						<span id="com_symbols">
+						<span id="com_symbols" company="<%=issuer%>" details="<%=details[0]%>" latest-price="<%=latest_price%>">
 							<small>
 								[<% for(var i = 0; i<details.length; i++){%>
 								<%= details[i] %>
@@ -15,6 +15,11 @@
 								,
 								<% } %>
 								<% } %>]
+							</small>
+						</span>
+						<span id="com_price">
+							<small>
+								<%=latest_price%>$
 							</small>
 						</span>
 						<span id="com_var">
@@ -132,7 +137,7 @@
 					</span>
 				</div>
 				<% }%>
-				<% var imp = (20*ovr+25*company_financial_rating+25*company_PEG+35*related_stock+50*company_sentiment)/155%>
+				<% var imp = company_rating%>
 				<% if(imp < 0) { %>
 				<div id="wid_limit" class="alert alert-danger" role="alert">
 					Company rating
@@ -219,7 +224,7 @@
 						<li role="presentation" id="mc_button2"><a href="">related to</a></li>
 						<li role="presentation" id="mc_button3"><a href="">financial data</a></li>
 						<li role="presentation" id="mc_button4"><a href="">charts</a></li>
-						<li role="presentation" id="mc_button4"><a href="">Invest now!</a></li>
+						<li role="presentation" id="mc_button5"><a href="">Invest now!</a></li>
 					</ul>
 				</div>
 				<div id="rel_area" class="col-sm-8 custom-main-panel">
@@ -273,4 +278,14 @@
 							<% } %>
 						</div>
 					</div>
+					<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									<h4 class="modal-title" id="gridSystemModalLabel">No search results!</h4>
+								</div>
+							</div><!-- /.modal-content -->
+						</div><!-- /.modal-dialog -->
+					</div><!-- /.modal -->
 				</div>
