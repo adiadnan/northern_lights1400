@@ -8,7 +8,7 @@ var Schema = mongoose.Schema;
 var userSchema = new Schema({
 	username : String,
 	password : String,
-	money_left: {type: Number}
+	money_left: {type: Number, default: 100000}
 },{
 	collection : 'user_collection'
 });
