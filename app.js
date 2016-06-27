@@ -13,6 +13,7 @@ var trending = require('./routes/trending');
 var companies = require('./routes/companies');
 var articles = require('./routes/articles');
 var search = require('./routes/search');
+var portofolio = require('./routes/portofolio');
 
 const request = require('request');
 const cheerio = require('cheerio');
@@ -44,6 +45,7 @@ app.use('/trending', trending);
 app.use('/companies', companies);
 app.use('/articles', articles);
 app.use('/search', search);
+app.use('/portofolio',portofolio);
 var s = 0;
 if(yahoo_scraping_activated){
   setInterval(function(){
@@ -56,6 +58,24 @@ if(yahoo_scraping_activated){
                 return console.log(err);
               }
               var $ = cheerio.load(html);
+              $('span.time_rtq_ticker').filter(function(){
+                var data = $(this).children();
+                var latest_price = data['0'].children[0].data;
+                // console.log(data['0'].children[0].data);
+                company.update({
+                  issuer: item.issuer
+                },{
+                  $set: {
+                    latest_price: latest_price
+                  }
+                },null, function(err, num){
+                  console.log('Updating price for ' + item.issuer);
+                  if(err){
+                    return console.log(err);
+                  }
+                  console.log(num);
+                });
+              })
               $('span.time_rtq_content').filter(function(){
                 var data = $(this).children();
                 var str = data['1'].children[0].data;
@@ -75,6 +95,7 @@ if(yahoo_scraping_activated){
                   latest_var: str
                 }
               },null, function(err, num){
+                console.log('Updating variation for ' + item.issuer);
                 if(err){
                   return console.log(err);
                 }
